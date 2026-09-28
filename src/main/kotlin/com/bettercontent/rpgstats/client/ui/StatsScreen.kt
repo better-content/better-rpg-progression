@@ -108,18 +108,18 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
         const val CONTROL_WIDTH = 62
         val DEFAULT_FONT = ResourceLocation("minecraft", "default")
 
-        const val PANEL_BORDER = 0xFF69717C.toInt()
-        const val PANEL_BACKGROUND = 0xEC101318.toInt()
-        const val SUMMARY_BACKGROUND = 0xE51B2027.toInt()
-        const val HEADER_BACKGROUND = 0xE0191D23.toInt()
-        const val ROW_BACKGROUND = 0xD9181C22.toInt()
-        const val ROW_ALTERNATE = 0xD91D2229.toInt()
-        const val ROW_HOVER = 0xEE29313A.toInt()
-        const val RULE_COLOR = 0xFF3E4650.toInt()
-        const val PRIMARY_TEXT = 0xFFF4F5F7.toInt()
-        const val SECONDARY_TEXT = 0xFFB8BEC7.toInt()
-        const val PENDING_UP = 0xFF72DB78.toInt()
-        const val PENDING_DOWN = 0xFFFF6B6B.toInt()
+        const val PANEL_BORDER = 0xFFAA8E62.toInt()
+        const val PANEL_BACKGROUND = 0xFFECDFBD.toInt()
+        const val SUMMARY_BACKGROUND = 0xFFE4D5AF.toInt()
+        const val HEADER_BACKGROUND = 0xFFDDCCA4.toInt()
+        const val ROW_BACKGROUND = 0xFFF5EBD3.toInt()
+        const val ROW_ALTERNATE = 0xFFEDE0C2.toInt()
+        const val ROW_HOVER = 0xFFD9CEAE.toInt()
+        const val RULE_COLOR = 0xFFBDA479.toInt()
+        const val PRIMARY_TEXT = 0xFF30483E.toInt()
+        const val SECONDARY_TEXT = 0xFF776C55.toInt()
+        const val PENDING_UP = 0xFF386C47.toInt()
+        const val PENDING_DOWN = 0xFF994A3B.toInt()
     }
 
     private data class Row(val def: ClientStatDef, var plus: Button? = null, var minus: Button? = null)
@@ -244,7 +244,7 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        renderBackground(guiGraphics)
+        guiGraphics.fill(0, 0, width, height, 0xFF1B2822.toInt())
         val layout = layout()
         val properties = buildPropertyRows()
         rightContentHeight = properties.size * PROPERTY_ROW_HEIGHT
@@ -267,7 +267,7 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
     private fun drawPanel(guiGraphics: GuiGraphics, layout: StatsScreenLayout) {
         borderedFill(guiGraphics, layout.panelX, layout.panelY, layout.panelX + layout.panelWidth,
             layout.panelY + layout.panelHeight, PANEL_BORDER, PANEL_BACKGROUND)
-        val titleText = title.string
+        val titleText = "RECORD / ATTRIBUTES"
         guiGraphics.drawString(font, titleText, width / 2 - font.width(titleText) / 2,
             layout.panelY + 5, PRIMARY_TEXT, false)
     }
@@ -325,7 +325,7 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
             val maxNameWidth = rowX + layout.attributeTileWidth - CONTROL_WIDTH - 4 - textX
             guiGraphics.enableScissor(textX, rowY, textX + maxNameWidth, rowY + 13)
             guiGraphics.drawString(font, Component.translatable(row.def.nameKey),
-                textX, rowY + 3, opaque(row.def.color), false)
+                textX, rowY + 3, PRIMARY_TEXT, false)
             guiGraphics.disableScissor()
             val points = workingAlloc[row.def.id] ?: 0
             val detailX = textX
@@ -361,7 +361,7 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
                 " ← ${compactSourceName(property.friendlyName, property.sourceName)}"
             } else ""
             guiGraphics.drawString(font, ellipsize(property.friendlyName + sourceSuffix, textWidth),
-                textX, rowY + 2, opaque(property.color), false)
+                textX, rowY + 2, PRIMARY_TEXT, false)
             val current = formatEffectValue(property.originalTotal, property.displayAsPercent)
             val totals = StatsPropertyTotals(property.originalTotal, property.workingTotal)
             val changed = StatsPropertyVisibility.hasPendingChange(totals)
@@ -382,11 +382,11 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
     private fun drawScrollbar(guiGraphics: GuiGraphics, x: Int, y: Int, viewportHeight: Int,
                               contentHeight: Int, offset: Double) {
         if (contentHeight <= viewportHeight) return
-        guiGraphics.fill(x, y, x + 2, y + viewportHeight, 0xAA303741.toInt())
+        guiGraphics.fill(x, y, x + 2, y + viewportHeight, 0xAA9E8C68.toInt())
         val thumbHeight = maxOf(16, viewportHeight * viewportHeight / contentHeight)
         val maxScroll = contentHeight - viewportHeight
         val thumbY = y + (offset / maxScroll * (viewportHeight - thumbHeight)).toInt()
-        guiGraphics.fill(x, thumbY, x + 2, thumbY + thumbHeight, 0xFFD4D8DE.toInt())
+        guiGraphics.fill(x, thumbY, x + 2, thumbY + thumbHeight, 0xFF496952.toInt())
     }
 
     private fun drawTooltip(guiGraphics: GuiGraphics, layout: StatsScreenLayout, mouseX: Int, mouseY: Int) {

@@ -4,6 +4,7 @@ import com.bettercontent.rpgstats.client.cache.ClientCache
 import com.bettercontent.rpgstats.client.cache.ClientStatDef
 import com.bettercontent.rpgstats.common.network.Network
 import com.bettercontent.rpgstats.common.network.packets.C2SAutoAllocationPlan
+import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
@@ -70,6 +71,17 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
     private fun enabledLabel(): Component = Component.translatable(
         if (enabled) "screen.rpg_stats.auto_enabled" else "screen.rpg_stats.auto_paused"
     )
+
+    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        graphics.fill(0, 0, width, height, 0xFF1B2822.toInt())
+        val left = width / 2 - 158
+        val top = height / 2 - 109
+        graphics.fill(left, top, left + 316, top + 218, 0xFFAA8E62.toInt())
+        graphics.fill(left + 2, top + 2, left + 314, top + 216, 0xFFECDFBD.toInt())
+        graphics.drawCenteredString(font, "RECORD / AUTO ALLOCATION", width / 2, top + 8, 0xFF30483E.toInt())
+        graphics.fill(left + 10, top + 22, left + 306, top + 23, 0xFFBDA479.toInt())
+        super.render(graphics, mouseX, mouseY, partialTick)
+    }
 
     override fun onClose() { minecraft?.setScreen(returnTo) }
 }
