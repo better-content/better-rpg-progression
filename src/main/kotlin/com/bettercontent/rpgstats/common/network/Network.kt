@@ -53,7 +53,8 @@ object Network {
                 lifePeak = stats.lifePeakLevel,
                 allocations = stats.allocations.toMap(),
                 autoAllocationEnabled = stats.autoAllocationEnabled,
-                autoAllocationPlan = stats.autoAllocationPlan.toList()
+                autoAllocationPlan = stats.autoAllocationPlan.toList(),
+                autoAllocationCursor = stats.autoAllocationCursor
             )
         )
     }

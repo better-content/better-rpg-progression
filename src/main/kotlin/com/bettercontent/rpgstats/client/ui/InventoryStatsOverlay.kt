@@ -22,6 +22,7 @@ object InventoryStatsOverlay {
     fun onInventoryForeground(event: ContainerScreenEvent.Render.Foreground) {
         val screen = event.containerScreen
         if (screen !is InventoryScreen) return
+        if (screen.javaClass.name == "com.bettercontent.journalui.JournalInventoryScreen") return
 
         val defs = ClientCache.defs
         if (defs.isEmpty()) return

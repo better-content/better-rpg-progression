@@ -5,7 +5,8 @@ data class ClientStatsSnapshot(
     val lifePeak: Int = 0,
     val allocations: Map<String, Int> = emptyMap(),
     val autoAllocationEnabled: Boolean = false,
-    val autoAllocationPlan: List<String> = emptyList()
+    val autoAllocationPlan: List<String> = emptyList(),
+    val autoAllocationCursor: Int = 0
 )
 
 data class ClientCurveDef(
