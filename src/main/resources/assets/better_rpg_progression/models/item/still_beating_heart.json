@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "better_rpg_progression:item/still_beating_heart"
+  }
+}

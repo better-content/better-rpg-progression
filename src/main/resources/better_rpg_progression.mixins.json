@@ -1,0 +1,20 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.bettercontent.betterrpgprogression.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "better_rpg_progression.refmap.json",
+  "mixins": [
+    "FoodDataMixin",
+    "LivingEntityEffectMixin",
+    "PlayerMixin",
+    "TaczDispersionMixin",
+    "ThirstPlayerMixin"
+  ],
+  "client": [
+    "TaczCameraSetupMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

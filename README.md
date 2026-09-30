@@ -1,4 +1,4 @@
-# RPG Stats
+# Better RPG Progression
 
 Pack-owned RPG stats and diminishing-returns system for Forge `1.20.1`.
 
@@ -41,7 +41,7 @@ The client captures the seeded stats screen at GUI scales 3 and 2, writes screen
 
 Deploy the reobfuscated runtime jar from:
 
-- `build/libs/rpg-stats-<version>.jar`
+- `build/libs/better-rpg-progression-<version>.jar`
 
 ## Community and support
 
@@ -49,9 +49,9 @@ For modpack and mod discussion, playtest feedback, and bug reports, join the [Be
 
 ## Canonical identity
 
-- Repository and release artifact: `rpg-stats`
-- Mod ID and resource namespace: `rpg_stats`
-- Java package: `com.bettercontent.rpgstats`
+- Repository and release artifact: `better-rpg-progression`
+- Mod ID and resource namespace: `better_rpg_progression`
+- Java package: `com.bettercontent.betterrpgprogression`
 - Validation: `./gradlew verifyFull`
 
 This normalization is a clean break. Worlds, configuration files, and integrations created for earlier identities are not migrated or aliased.

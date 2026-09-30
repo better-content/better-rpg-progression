@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'rpg-stats'
+rootProject.name = 'better-rpg-progression'

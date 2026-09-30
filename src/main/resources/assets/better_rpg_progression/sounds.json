@@ -1,0 +1,10 @@
+{
+  "aspect.impact": { "sounds": ["better_rpg_progression:aspect/impact"] },
+  "aspect.tempo": { "sounds": ["better_rpg_progression:aspect/tempo"] },
+  "aspect.work": { "sounds": ["better_rpg_progression:aspect/work"] },
+  "aspect.mobility": { "sounds": ["better_rpg_progression:aspect/mobility"] },
+  "aspect.endurance": { "sounds": ["better_rpg_progression:aspect/endurance"] },
+  "aspect.robustness": { "sounds": ["better_rpg_progression:aspect/robustness"] },
+  "aspect.renewal": { "sounds": ["better_rpg_progression:aspect/renewal"] },
+  "aspect.control": { "sounds": ["better_rpg_progression:aspect/control"] }
+}

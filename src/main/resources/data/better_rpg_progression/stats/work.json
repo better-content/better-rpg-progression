@@ -1,0 +1,22 @@
+{
+  "name_key": "stat.better_rpg_progression.aptitude",
+  "order": 30,
+  "icon": "⚒",
+  "color": "#F0E2C5",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "better_rpg_progression:mining_speed",
+      "operation": "multiply_base",
+      "curve": { "type": "hyperbola", "cap": 0.75, "k": 20.0, "min": 0.0, "max": 0.75 },
+      "is_primary": true
+    },
+    {
+      "type": "attribute",
+      "attribute": "forge:block_reach",
+      "operation": "add",
+      "curve": { "type": "hyperbola", "cap": 1.0, "k": 20.0, "min": 0.0, "max": 1.0 },
+      "is_primary": false
+    }
+  ]
+}

@@ -8,15 +8,15 @@ plugins {
 }
 
 mixin {
-    add sourceSets.main, 'rpg_stats.refmap.json'
-    config 'rpg_stats.mixins.json'
+    add sourceSets.main, 'better_rpg_progression.refmap.json'
+    config 'better_rpg_progression.mixins.json'
 }
 
 version = mod_version
 group = mod_group_id
 
 base {
-    archivesName = 'rpg-stats'
+    archivesName = 'better-rpg-progression'
 }
 
 java {
@@ -58,7 +58,7 @@ minecraft {
             client true
             workingDirectory project.file('run-visual-harness')
             property 'forge.logging.console.level', 'info'
-            property 'rpg_stats.visualHarness', 'true'
+            property 'better_rpg_progression.visualHarness', 'true'
             args '--width', '1280', '--height', '720'
             mods {
                 "${mod_id}" {
@@ -159,7 +159,7 @@ tasks.named('compileJava', JavaCompile).configure {
     // an incremental/cache restore from considering compilation complete while the
     // release-critical production refmap is absent.
     outputs.file(layout.buildDirectory.file('tmp/compileJava/compileJava-refmap.json'))
-    outputs.file(layout.buildDirectory.file('tmp/compileJava/rpg_stats.refmap.json'))
+    outputs.file(layout.buildDirectory.file('tmp/compileJava/better_rpg_progression.refmap.json'))
     // The Mixin annotation processor does not recreate refmaps reliably from javac's
     // incremental state when these sidecars are deleted independently of class files.
     options.incremental = false
@@ -173,9 +173,9 @@ tasks.register('verifyMixinRefmap') {
         def archive = tasks.named('jar', Jar).get().archiveFile.get().asFile
         def zip = new java.util.zip.ZipFile(archive)
         try {
-            def entry = zip.getEntry('rpg_stats.refmap.json')
+            def entry = zip.getEntry('better_rpg_progression.refmap.json')
             if (entry == null || entry.size <= 2) {
-                throw new GradleException("${archive.name} is missing rpg_stats.refmap.json")
+                throw new GradleException("${archive.name} is missing better_rpg_progression.refmap.json")
             }
         } finally {
             zip.close()

@@ -1,0 +1,1 @@
+{"type":"minecraft:block","pools":[{"rolls":1,"entries":[{"type":"minecraft:item","name":"better_rpg_progression:heart_block","functions":[{"function":"minecraft:copy_nbt","source":"block_entity","ops":[{"source":"Fragments","target":"BlockEntityTag.Fragments","op":"replace"}]}]}]}]}

@@ -2,9 +2,9 @@
 
 ## Project identity
 
-- Repository and artifact: `rpg-stats`
-- Mod ID and resource namespace: `rpg_stats`
-- Base package: `com.bettercontent.rpgstats`
+- Repository and artifact: `better-rpg-progression`
+- Mod ID and resource namespace: `better_rpg_progression`
+- Base package: `com.bettercontent.betterrpgprogression`
 - Java: 17
 - Forge: 1.20.1-47.4.13
 

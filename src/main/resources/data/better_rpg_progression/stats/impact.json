@@ -1,0 +1,30 @@
+{
+  "name_key": "stat.better_rpg_progression.strength",
+  "order": 10,
+  "icon": "✦",
+  "color": "#FF4055",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "better_rpg_progression:outgoing_damage",
+      "operation": "multiply_base",
+      "curve": { "type": "hyperbola", "cap": 0.6, "k": 20.0, "min": 0.0, "max": 0.6 },
+      "is_primary": true
+    },
+    {
+      "type": "attribute",
+      "attribute": "epicfight:impact",
+      "operation": "add",
+      "curve": { "type": "hyperbola", "cap": 0.75, "k": 20.0, "min": 0.0, "max": 0.75 },
+      "is_primary": false,
+      "requires_mod": "epicfight"
+    },
+    {
+      "type": "attribute",
+      "attribute": "minecraft:generic.attack_knockback",
+      "operation": "add",
+      "curve": { "type": "hyperbola", "cap": 0.4, "k": 20.0, "min": 0.0, "max": 0.4 },
+      "is_primary": false
+    }
+  ]
+}

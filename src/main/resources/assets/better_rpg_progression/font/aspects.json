@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "better_rpg_progression:gui/aspect_badges.png",
+      "ascent": 16,
+      "height": 18,
+      "chars": [""]
+    }
+  ]
+}
