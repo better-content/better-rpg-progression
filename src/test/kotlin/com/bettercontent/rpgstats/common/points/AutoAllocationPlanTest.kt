@@ -10,13 +10,14 @@ class AutoAllocationPlanTest {
     private val admitted = mapOf("rpg_stats:impact" to -1, "rpg_stats:tempo" to 2)
 
     @Test
-    fun `plan spends earned points in order and skips a capped choice`() {
+    fun `plan spends only points assigned to the levels earned`() {
         val stats = PlayerStats().apply { unspentPoints = 5 }
-        assertTrue(AutoAllocationPlan.replace(stats, true, listOf("rpg_stats:tempo", "rpg_stats:impact"), admitted))
+        assertTrue(AutoAllocationPlan.replace(stats, true,
+            listOf("rpg_stats:tempo", "", "rpg_stats:impact", "rpg_stats:tempo", "rpg_stats:tempo"), admitted))
 
-        assertEquals(mapOf("rpg_stats:tempo" to 2, "rpg_stats:impact" to 3), AutoAllocationPlan.apply(stats, admitted))
-        assertEquals(0, stats.unspentPoints)
-        assertEquals(mapOf("rpg_stats:tempo" to 2, "rpg_stats:impact" to 3), stats.allocations)
+        assertEquals(mapOf("rpg_stats:tempo" to 2, "rpg_stats:impact" to 1), AutoAllocationPlan.apply(stats, admitted, 1, 5))
+        assertEquals(2, stats.unspentPoints)
+        assertEquals(mapOf("rpg_stats:tempo" to 2, "rpg_stats:impact" to 1), stats.allocations)
     }
 
     @Test
@@ -51,7 +52,7 @@ class AutoAllocationPlanTest {
         val stats = PlayerStats().apply { unspentPoints = 4 }
         assertTrue(AutoAllocationPlan.replace(stats, true, listOf("rpg_stats:impact"), admitted))
 
-        AutoAllocationPlan.apply(stats, admitted, budget = 1)
+        AutoAllocationPlan.apply(stats, admitted, 1, 1)
 
         assertEquals(3, stats.unspentPoints)
         assertEquals(1, stats.allocations["rpg_stats:impact"])

@@ -244,7 +244,6 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
     }
 
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        guiGraphics.fill(0, 0, width, height, 0xFF1B2822.toInt())
         val layout = layout()
         val properties = buildPropertyRows()
         rightContentHeight = properties.size * PROPERTY_ROW_HEIGHT
@@ -261,6 +260,14 @@ class StatsScreen : Screen(Component.translatable("screen.rpg_stats.title")) {
         guiGraphics.fill(layout.panelX + 1, layout.footerTop, layout.panelX + layout.panelWidth - 1, layout.footerTop + 1, RULE_COLOR)
 
         super.render(guiGraphics, mouseX, mouseY, partialTick)
+        children().filterIsInstance<Button>().filter { it.visible }.forEach { button ->
+            val x = button.x; val y = button.y; val w = button.width; val h = button.height
+            val hover = mouseX in x until (x + w) && mouseY in y until (y + h)
+            guiGraphics.fill(x, y, x + w, y + h,
+                if (!button.active) 0xFF849382.toInt() else if (hover) 0xFF59755C.toInt() else 0xFF405D49.toInt())
+            guiGraphics.fill(x, y, x + w, y + 2, PANEL_BORDER)
+            guiGraphics.drawCenteredString(font, button.message, x + w / 2, y + (h - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
+        }
         drawTooltip(guiGraphics, layout, mouseX, mouseY)
     }
 

@@ -42,10 +42,8 @@ class PlayerStats {
         tag.putBoolean("autoAllocationEnabled", autoAllocationEnabled)
         tag.putInt("autoAllocationCursor", autoAllocationCursor.coerceAtLeast(0))
         val plan = ListTag()
-        autoAllocationPlan.take(64).forEach { id ->
-            if (id.isNotBlank() && id.length <= 128) {
-                plan.add(net.minecraft.nbt.StringTag.valueOf(id))
-            }
+        autoAllocationPlan.take(256).forEach { id ->
+            plan.add(net.minecraft.nbt.StringTag.valueOf(id.take(128)))
         }
         tag.put("autoAllocationPlan", plan)
         return tag
@@ -68,9 +66,9 @@ class PlayerStats {
         autoAllocationCursor = tag.getInt("autoAllocationCursor").coerceAtLeast(0)
         autoAllocationPlan.clear()
         val plan = tag.getList("autoAllocationPlan", Tag.TAG_STRING.toInt())
-        for (i in 0 until minOf(plan.size, 64)) {
+        for (i in 0 until minOf(plan.size, 256)) {
             val id = plan.getString(i)
-            if (id.isNotBlank() && id.length <= 128 && id !in autoAllocationPlan) autoAllocationPlan += id
+            autoAllocationPlan += id.take(128)
         }
         if (autoAllocationPlan.isEmpty()) autoAllocationCursor = 0
     }

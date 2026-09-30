@@ -32,7 +32,7 @@ data class C2SAutoAllocationPlan(val enabled: Boolean, val orderedIds: List<Stri
                 val player: ServerPlayer = context.sender ?: return@enqueueWork
                 val stats = StatsCap.get(player) ?: return@enqueueWork
                 val admitted = RegistryState.activeSnapshot().mapKeys { it.key.toString() }.mapValues { it.value.maxPoints }
-                val canonical = msg.orderedIds.mapNotNull { ResourceLocation.tryParse(it)?.toString() }
+                val canonical = msg.orderedIds.mapNotNull { if (it.isEmpty()) "" else ResourceLocation.tryParse(it)?.toString() }
                 if (canonical.size != msg.orderedIds.size || !AutoAllocationPlan.replace(stats, msg.enabled, canonical, admitted)) {
                     Network.syncTo(player)
                     return@enqueueWork

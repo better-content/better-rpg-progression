@@ -3,113 +3,127 @@ package com.bettercontent.rpgstats.client.ui
 import com.bettercontent.rpgstats.client.cache.ClientCache
 import com.bettercontent.rpgstats.common.network.Network
 import com.bettercontent.rpgstats.common.network.packets.C2SAutoAllocationPlan
+import com.bettercontent.rpgstats.common.points.AutoAllocationPlan
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
+import kotlin.math.roundToInt
 
-/** Editable order and a faithful preview of the next level-earned points. */
+/** One planned attribute for each earned Minecraft experience level. */
 class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.translatable("screen.rpg_stats.auto_plan")) {
     private val plan = ClientCache.stats.autoAllocationPlan.toMutableList()
     private var enabled = ClientCache.stats.autoAllocationEnabled
-    private val pageWidth = 386
-    private fun left() = width / 2 - pageWidth / 2
-    private fun top() = height / 2 - 146
+    private var centeredLevel = (ClientCache.stats.lifePeak + 1).coerceIn(1, AutoAllocationPlan.MAX_ENTRIES)
+    private var dragX: Double? = null
+    private var dragRemainder = 0.0
+    private val pageWidth get() = minOf(600, width - 16)
+    private val pageHeight get() = minOf(330, height - 16)
+    private val left get() = (width - pageWidth) / 2
+    private val top get() = (height - pageHeight) / 2
+    private val cardWidth = 48
 
     override fun init() {
         super.init()
-        val x = left() + 12
-        val y = top() + 27
-        val gap = 6
-        val buttonWidth = (pageWidth - 24 - gap * 2) / 3
+        val x = left + 12
+        val y = top + 27
         addRenderableWidget(Button.builder(enabledLabel()) { button ->
             enabled = !enabled
             button.message = enabledLabel()
-        }.pos(x, y).size(buttonWidth, 20).build())
+        }.pos(x, y).size(95, 19).build())
         addRenderableWidget(Button.builder(Component.translatable("screen.rpg_stats.clear_plan")) {
             plan.clear()
-            refreshEditor()
-        }.pos(x + buttonWidth + gap, y).size(buttonWidth, 20).build())
+        }.pos(x + 101, y).size(80, 19).build())
         addRenderableWidget(Button.builder(Component.translatable("screen.rpg_stats.done")) {
+            trimTail()
             Network.sendToServer(C2SAutoAllocationPlan(enabled, plan.toList()))
             minecraft?.setScreen(returnTo)
-        }.pos(x + (buttonWidth + gap) * 2, y).size(buttonWidth, 20).build())
-        rebuildRows()
+        }.pos(left + pageWidth - 92, y).size(80, 19).build())
+        val definitions = ClientCache.defs
+        val buttonWidth = minOf(230, pageWidth - 40)
+        val xButton = width / 2 - buttonWidth / 2
+        definitions.forEachIndexed { index, def ->
+            val label = Component.translatable(def.nameKey)
+            addRenderableWidget(Button.builder(label) {
+                val slot = centeredLevel - 1
+                while (plan.size <= slot) plan.add("")
+                plan[slot] = def.id
+            }.pos(xButton, top + 61 + index * 23).size(buttonWidth, 20).build())
+        }
     }
 
-    private fun refreshEditor() { clearWidgets(); init() }
-
-    private fun rebuildRows() {
-        val x = left() + 12
-        val y0 = top() + 60
-        ClientCache.defs.take(8).forEachIndexed { index, def ->
-            val y = y0 + index * 19
-            val present = def.id in plan
-            addRenderableWidget(Button.builder(Component.translatable(if (present) "screen.rpg_stats.remove_plan" else "screen.rpg_stats.add_plan")) {
-                if (present) plan.remove(def.id) else plan.add(def.id)
-                refreshEditor()
-            }.pos(x, y).size(58, 18).build())
-            addRenderableWidget(Button.builder(Component.translatable(def.nameKey)) { }
-                .pos(x + 64, y).size(238, 18).build().also { it.active = false })
-            if (present) {
-                val ordinal = plan.indexOf(def.id)
-                addRenderableWidget(Button.builder(Component.literal("↑")) {
-                    if (ordinal > 0) { val moved = plan.removeAt(ordinal); plan.add(ordinal - 1, moved); refreshEditor() }
-                }.pos(x + 308, y).size(28, 18).build().also { it.active = ordinal > 0 })
-                addRenderableWidget(Button.builder(Component.literal("↓")) {
-                    if (ordinal < plan.lastIndex) { val moved = plan.removeAt(ordinal); plan.add(ordinal + 1, moved); refreshEditor() }
-                }.pos(x + 342, y).size(28, 18).build().also { it.active = ordinal < plan.lastIndex })
-            }
-        }
+    private fun trimTail() {
+        while (plan.lastOrNull().isNullOrEmpty() && plan.isNotEmpty()) plan.removeAt(plan.lastIndex)
     }
 
     private fun enabledLabel() = Component.translatable(if (enabled) "screen.rpg_stats.auto_enabled" else "screen.rpg_stats.auto_paused")
 
-    private fun projected(): List<String?> {
-        val stats = ClientCache.stats
-        val counts = stats.allocations.toMutableMap()
-        val limits = ClientCache.defs.associate { it.id to it.maxPoints }
-        var cursor = if (plan.isEmpty()) 0 else stats.autoAllocationCursor.mod(plan.size)
-        return List(8) {
-            if (!enabled || plan.isEmpty()) return@List null
-            var chosen: String? = null
-            repeat(plan.size) {
-                if (chosen == null) {
-                    val id = plan[cursor]
-                    cursor = (cursor + 1).mod(plan.size)
-                    val cap = limits[id]
-                    if (cap != null && (cap < 0 || counts.getOrDefault(id, 0) < cap)) {
-                        chosen = id
-                        counts[id] = counts.getOrDefault(id, 0) + 1
-                    }
-                }
-            }
-            chosen
+    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        val x = left; val y = top
+        graphics.fill(x, y, x + pageWidth, y + pageHeight, 0xFFAA8E62.toInt())
+        graphics.fill(x + 2, y + 2, x + pageWidth - 2, y + pageHeight - 2, 0xFFECDFBD.toInt())
+        graphics.drawCenteredString(font, "RECORD / LEVEL PLAN", width / 2, y + 8, 0xFF30483E.toInt())
+        graphics.drawCenteredString(font, "Level $centeredLevel: choose an attribute", width / 2, y + 48, 0xFF30483E.toInt())
+        val timelineY = y + pageHeight - 63
+        graphics.fill(x + 10, timelineY - 5, x + pageWidth - 10, timelineY - 4, 0xFFBDA479.toInt())
+        val mid = width / 2
+        val visible = (pageWidth - 24) / cardWidth
+        val half = visible / 2
+        for (offset in -half..half) {
+            val level = centeredLevel + offset
+            if (level !in 1..AutoAllocationPlan.MAX_ENTRIES) continue
+            val cardX = mid + offset * cardWidth - (cardWidth - 3) / 2
+            if (cardX < x + 10 || cardX + cardWidth - 3 > x + pageWidth - 10) continue
+            val assigned = plan.getOrNull(level - 1).orEmpty()
+            graphics.fill(cardX, timelineY, cardX + cardWidth - 3, timelineY + 42,
+                if (level == centeredLevel) 0xFFBCCDAF.toInt() else 0xFFD7C8A7.toInt())
+            graphics.drawCenteredString(font, "Lv $level", cardX + 22, timelineY + 4, 0xFF30483E.toInt())
+            val name = ClientCache.defs.firstOrNull { it.id == assigned }?.let { Component.translatable(it.nameKey).string }
+            graphics.drawCenteredString(font, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22,
+                timelineY + 22, 0xFF30483E.toInt())
+        }
+        graphics.drawCenteredString(font, "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, 0xFF776C55.toInt())
+        super.render(graphics, mouseX, mouseY, partialTick)
+        children().filterIsInstance<Button>().filter { it.visible }.forEach { button ->
+            val bx = button.x; val by = button.y; val bw = button.width; val bh = button.height
+            val hover = mouseX in bx until (bx + bw) && mouseY in by until (by + bh)
+            graphics.fill(bx, by, bx + bw, by + bh, if (hover) 0xFF59755C.toInt() else 0xFF405D49.toInt())
+            graphics.fill(bx, by, bx + bw, by + 2, 0xFFAA8E62.toInt())
+            graphics.drawCenteredString(font, button.message, bx + bw / 2, by + (bh - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
         }
     }
 
-    override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
-        graphics.fill(0, 0, width, height, 0xFF1B2822.toInt())
-        val x = left(); val y = top()
-        graphics.fill(x, y, x + pageWidth, y + 292, 0xFFAA8E62.toInt())
-        graphics.fill(x + 2, y + 2, x + pageWidth - 2, y + 290, 0xFFECDFBD.toInt())
-        graphics.drawCenteredString(font, "RECORD / AUTO ALLOCATION", width / 2, y + 9, 0xFF30483E.toInt())
-        graphics.fill(x + 12, y + 53, x + pageWidth - 12, y + 54, 0xFFBDA479.toInt())
-        val timelineY = y + 223
-        graphics.fill(x + 12, timelineY - 4, x + pageWidth - 12, timelineY - 3, 0xFFBDA479.toInt())
-        graphics.drawString(font, "NEXT EIGHT LEVEL POINTS", x + 12, timelineY, 0xFF30483E.toInt(), false)
-        val steps = projected()
-        val names = ClientCache.defs.associate { it.id to Component.translatable(it.nameKey).string }
-        val stepWidth = 42
-        val gap = 3
-        steps.forEachIndexed { index, id ->
-            val sx = x + 12 + index * (stepWidth + gap)
-            graphics.fill(sx, timelineY + 14, sx + stepWidth, timelineY + 59, if (id == null) 0xFFD7C8A7.toInt() else 0xFFC8D2B6.toInt())
-            graphics.drawCenteredString(font, "+${index + 1}", sx + stepWidth / 2, timelineY + 17, 0xFF30483E.toInt())
-            val label = if (id == null) "—" else font.plainSubstrByWidth(names[id] ?: id, stepWidth - 4)
-            graphics.drawCenteredString(font, label, sx + stepWidth / 2, timelineY + 34, 0xFF30483E.toInt())
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (button == 0 && mouseY in (top + pageHeight - 63).toDouble()..(top + pageHeight - 20).toDouble()) {
+            dragX = mouseX
+            dragRemainder = 0.0
+            val offset = ((mouseX - width / 2) / cardWidth).roundToInt()
+            centeredLevel = (centeredLevel + offset).coerceIn(1, AutoAllocationPlan.MAX_ENTRIES)
+            return true
         }
-        super.render(graphics, mouseX, mouseY, partialTick)
+        return super.mouseClicked(mouseX, mouseY, button)
+    }
+
+    override fun mouseDragged(mouseX: Double, mouseY: Double, button: Int, dragX: Double, dragY: Double): Boolean {
+        val oldX = this.dragX ?: return super.mouseDragged(mouseX, mouseY, button, dragX, dragY)
+        dragRemainder += oldX - mouseX
+        val steps = (dragRemainder / cardWidth).toInt()
+        if (steps != 0) {
+            centeredLevel = (centeredLevel + steps).coerceIn(1, AutoAllocationPlan.MAX_ENTRIES)
+            dragRemainder -= steps * cardWidth
+        }
+        this.dragX = mouseX
+        return true
+    }
+
+    override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        dragX = null
+        return super.mouseReleased(mouseX, mouseY, button)
+    }
+
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, scrollDelta: Double): Boolean {
+        centeredLevel = (centeredLevel - scrollDelta.toInt()).coerceIn(1, AutoAllocationPlan.MAX_ENTRIES)
+        return true
     }
 
     override fun onClose() { minecraft?.setScreen(returnTo) }
