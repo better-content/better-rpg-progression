@@ -29,7 +29,7 @@ class RpgStatsResourceTest {
         "endurance" to AspectContract(50, "#52606A", "∞", "constitution"),
         "robustness" to AspectContract(60, "#AF6A2F", "◆", "fortitude"),
         "renewal" to AspectContract(70, "#6CCAF0", "✚", "vitality"),
-        "control" to AspectContract(80, "#8E5BB7", "⊕", "perception")
+        "control" to AspectContract(80, "#8E5BB7", "⊕", "focus")
     )
 
     private val effects = mapOf(
@@ -66,6 +66,8 @@ class RpgStatsResourceTest {
             "better_rpg_progression:beneficial_effect_duration" to EffectContract(0.25, "add", displayAsPercent = true)
         ),
         "control" to mapOf(
+            "better_rpg_progression:arrow_spread_reduction" to EffectContract(0.35, "add", displayAsPercent = true),
+            "better_rpg_progression:arrow_speed_bonus" to EffectContract(0.08, "add", displayAsPercent = true),
             "better_rpg_progression:recoil_reduction" to EffectContract(0.35, "add", "tacz", true),
             "better_rpg_progression:dispersion_reduction" to EffectContract(0.35, "add", "tacz", true),
             "goety:spell_range" to EffectContract(0.25, "multiply_base", "goety")

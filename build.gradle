@@ -110,11 +110,20 @@ repositories {
     maven { url = 'https://www.cursemaven.com'; content { includeGroup 'curse.maven' } }
 }
 
+def visualHarnessNotices = tasks.register('stageVisualHarnessNotices', Jar) {
+    archiveFileName = 'better-gameplay-notices-dev.jar'
+    destinationDirectory = layout.buildDirectory.dir('visual-harness')
+    from '../better-gameplay-notices/build/classes/java/main'
+    from '../better-gameplay-notices/build/resources/main'
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly files(System.getenv('BC_CUSTOM_MOD_JAR_DIR')
         ? "${System.getenv('BC_CUSTOM_MOD_JAR_DIR')}/better-gameplay-notices-1.0.0.jar"
         : '../better-gameplay-notices/build/libs/better-gameplay-notices-1.0.0.jar')
+    // The isolated client uses named development classes; the deployable JAR is reobfuscated.
+    visualHarnessRuntimeOnly files(visualHarnessNotices.flatMap { it.archiveFile })
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     implementation fg.deobf("thedarkcolour:kotlinforforge:${kff_version}")
     // The language provider is nested into KotlinForForge at runtime; expose its
@@ -217,6 +226,7 @@ tasks.register('prepareVisualHarnessOptions', Copy) {
 tasks.configureEach {
     if (name == 'runVisualHarness') {
         dependsOn tasks.named('prepareVisualHarnessOptions')
+        dependsOn visualHarnessNotices
     }
 }
 

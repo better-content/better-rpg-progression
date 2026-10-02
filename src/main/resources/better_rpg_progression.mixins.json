@@ -8,6 +8,7 @@
     "FoodDataMixin",
     "LivingEntityEffectMixin",
     "PlayerMixin",
+    "ProjectileFocusMixin",
     "TaczDispersionMixin",
     "ThirstPlayerMixin"
   ],

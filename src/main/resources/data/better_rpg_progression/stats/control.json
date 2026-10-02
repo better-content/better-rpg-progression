@@ -1,15 +1,31 @@
 {
-  "name_key": "stat.better_rpg_progression.perception",
+  "name_key": "stat.better_rpg_progression.focus",
   "order": 80,
   "icon": "⊕",
   "color": "#8E5BB7",
   "effects": [
     {
       "type": "attribute",
-      "attribute": "better_rpg_progression:recoil_reduction",
+      "attribute": "better_rpg_progression:arrow_spread_reduction",
       "operation": "add",
       "curve": { "type": "hyperbola", "cap": 0.35, "k": 20.0, "min": 0.0, "max": 0.35 },
       "is_primary": true,
+      "display_as_percent": true
+    },
+    {
+      "type": "attribute",
+      "attribute": "better_rpg_progression:arrow_speed_bonus",
+      "operation": "add",
+      "curve": { "type": "hyperbola", "cap": 0.08, "k": 20.0, "min": 0.0, "max": 0.08 },
+      "is_primary": false,
+      "display_as_percent": true
+    },
+    {
+      "type": "attribute",
+      "attribute": "better_rpg_progression:recoil_reduction",
+      "operation": "add",
+      "curve": { "type": "hyperbola", "cap": 0.35, "k": 20.0, "min": 0.0, "max": 0.35 },
+      "is_primary": false,
       "display_as_percent": true,
       "requires_mod": "tacz"
     },

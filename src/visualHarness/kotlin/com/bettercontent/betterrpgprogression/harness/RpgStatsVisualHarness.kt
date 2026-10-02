@@ -66,14 +66,14 @@ object RpgStatsVisualHarness {
                     seedStats()
                     val screen = StatsScreen()
                     minecraft.setScreen(screen)
-                    screen.children().filterIsInstance<Button>().firstOrNull { it.message.string == "+" }?.onPress()
+                    screen.children().filterIsInstance<Button>().lastOrNull { it.message.string == "+" }?.onPress()
                     println("RPG_STATS_VISUAL_HARNESS pending-compact-stats-ready")
                 } else if (statsCaptures == 2) {
                     minecraft.options.guiScale().set(2)
                     minecraft.resizeDisplay()
                     val screen = StatsScreen()
                     minecraft.setScreen(screen)
-                    screen.children().filterIsInstance<Button>().firstOrNull { it.message.string == "+" }?.onPress()
+                    screen.children().filterIsInstance<Button>().lastOrNull { it.message.string == "+" }?.onPress()
                     println("RPG_STATS_VISUAL_HARNESS expanded-stats-ready")
                 } else {
                     minecraft.setScreen(IdentitySoundReviewScreen())
@@ -152,7 +152,9 @@ object RpgStatsVisualHarness {
             ),
             stat(
                 "control", "⊕", 0x8A6CB2,
-                effect("better_rpg_progression:recoil_reduction", 0, 0.35, displayAsPercent = true),
+                effect("better_rpg_progression:arrow_spread_reduction", 0, 0.35, displayAsPercent = true),
+                effect("better_rpg_progression:arrow_speed_bonus", 0, 0.08, primary = false, displayAsPercent = true),
+                effect("better_rpg_progression:recoil_reduction", 0, 0.35, primary = false, displayAsPercent = true),
                 effect("better_rpg_progression:dispersion_reduction", 0, 0.35, primary = false, displayAsPercent = true),
                 effect("goety:spell_range", 1, 0.25, primary = false)
             )
@@ -195,7 +197,7 @@ object RpgStatsVisualHarness {
         "endurance" to "constitution",
         "robustness" to "fortitude",
         "renewal" to "vitality",
-        "control" to "perception"
+        "control" to "focus"
     )
 
     private fun effect(

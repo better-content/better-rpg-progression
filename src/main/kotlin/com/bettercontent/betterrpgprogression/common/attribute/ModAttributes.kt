@@ -36,6 +36,14 @@ object ModAttributes {
         RangedAttribute("attribute.name.better_rpg_progression.dispersion_reduction", 0.0, -1.0, 1.0).setSyncable(true)
     }
 
+    val ARROW_SPREAD_REDUCTION: RegistryObject<Attribute> = ATTRIBUTES.register("arrow_spread_reduction") {
+        RangedAttribute("attribute.name.better_rpg_progression.arrow_spread_reduction", 0.0, 0.0, 0.35).setSyncable(true)
+    }
+
+    val ARROW_SPEED_BONUS: RegistryObject<Attribute> = ATTRIBUTES.register("arrow_speed_bonus") {
+        RangedAttribute("attribute.name.better_rpg_progression.arrow_speed_bonus", 0.0, 0.0, 0.08).setSyncable(true)
+    }
+
     val OUTGOING_DAMAGE: RegistryObject<Attribute> = ATTRIBUTES.register("outgoing_damage") {
         RangedAttribute("attribute.name.better_rpg_progression.outgoing_damage", 0.0, 0.0, 2.0).setSyncable(true)
     }
@@ -62,6 +70,8 @@ object PlayerAttributeRegistration {
         event.add(EntityType.PLAYER, ModAttributes.MINING_SPEED.get())
         event.add(EntityType.PLAYER, ModAttributes.RECOIL_REDUCTION.get())
         event.add(EntityType.PLAYER, ModAttributes.DISPERSION_REDUCTION.get())
+        event.add(EntityType.PLAYER, ModAttributes.ARROW_SPREAD_REDUCTION.get())
+        event.add(EntityType.PLAYER, ModAttributes.ARROW_SPEED_BONUS.get())
         event.add(EntityType.PLAYER, ModAttributes.OUTGOING_DAMAGE.get())
         event.add(EntityType.PLAYER, ModAttributes.HARMFUL_EFFECT_DURATION_REDUCTION.get())
         event.add(EntityType.PLAYER, ModAttributes.BENEFICIAL_EFFECT_DURATION.get())
