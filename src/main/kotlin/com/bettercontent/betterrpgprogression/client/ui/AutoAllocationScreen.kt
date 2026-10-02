@@ -4,6 +4,7 @@ import com.bettercontent.betterrpgprogression.client.cache.ClientCache
 import com.bettercontent.betterrpgprogression.common.network.Network
 import com.bettercontent.betterrpgprogression.common.network.packets.C2SAutoAllocationPlan
 import com.bettercontent.betterrpgprogression.common.points.AutoAllocationPlan
+import com.bettercontent.gameplaynotices.BetterUiTheme
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.screens.Screen
@@ -60,12 +61,16 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val x = left; val y = top
-        graphics.fill(x, y, x + pageWidth, y + pageHeight, 0xFFAA8E62.toInt())
-        graphics.fill(x + 2, y + 2, x + pageWidth - 2, y + pageHeight - 2, 0xFFECDFBD.toInt())
-        graphics.drawCenteredString(font, "RECORD / LEVEL PLAN", width / 2, y + 8, 0xFF30483E.toInt())
-        graphics.drawCenteredString(font, "Level $centeredLevel: choose an attribute", width / 2, y + 48, 0xFF30483E.toInt())
+        val border = BetterUiTheme.color(0xFFAA8E62.toInt(), 0xFF987750.toInt())
+        val paper = BetterUiTheme.color(0xFFECDFBD.toInt(), 0xFF182B26.toInt())
+        val ink = BetterUiTheme.color(0xFF30483E.toInt(), 0xFFF4E6C7.toInt())
+        val muted = BetterUiTheme.color(0xFF776C55.toInt(), 0xFFC4B99E.toInt())
+        graphics.fill(x, y, x + pageWidth, y + pageHeight, border)
+        graphics.fill(x + 2, y + 2, x + pageWidth - 2, y + pageHeight - 2, paper)
+        centered(graphics, "RECORD / LEVEL PLAN", width / 2, y + 8, ink)
+        centered(graphics, "Level $centeredLevel: choose an attribute", width / 2, y + 48, ink)
         val timelineY = y + pageHeight - 63
-        graphics.fill(x + 10, timelineY - 5, x + pageWidth - 10, timelineY - 4, 0xFFBDA479.toInt())
+        graphics.fill(x + 10, timelineY - 5, x + pageWidth - 10, timelineY - 4, border)
         val mid = width / 2
         val visible = (pageWidth - 24) / cardWidth
         val half = visible / 2
@@ -76,21 +81,31 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
             if (cardX < x + 10 || cardX + cardWidth - 3 > x + pageWidth - 10) continue
             val assigned = plan.getOrNull(level - 1).orEmpty()
             graphics.fill(cardX, timelineY, cardX + cardWidth - 3, timelineY + 42,
-                if (level == centeredLevel) 0xFFBCCDAF.toInt() else 0xFFD7C8A7.toInt())
-            graphics.drawCenteredString(font, "Lv $level", cardX + 22, timelineY + 4, 0xFF30483E.toInt())
+                if (level == centeredLevel) BetterUiTheme.color(0xFFBCCDAF.toInt(), 0xFF547B61.toInt())
+                else BetterUiTheme.color(0xFFD7C8A7.toInt(), 0xFF2D4237.toInt()))
+            centered(graphics, "Lv $level", cardX + 22, timelineY + 4, ink)
             val name = ClientCache.defs.firstOrNull { it.id == assigned }?.let { Component.translatable(it.nameKey).string }
-            graphics.drawCenteredString(font, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22,
-                timelineY + 22, 0xFF30483E.toInt())
+            centered(graphics, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22, timelineY + 22, ink)
         }
-        graphics.drawCenteredString(font, "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, 0xFF776C55.toInt())
+        centered(graphics, "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, muted)
         super.render(graphics, mouseX, mouseY, partialTick)
         children().filterIsInstance<Button>().filter { it.visible }.forEach { button ->
             val bx = button.x; val by = button.y; val bw = button.width; val bh = button.height
             val hover = mouseX in bx until (bx + bw) && mouseY in by until (by + bh)
             graphics.fill(bx, by, bx + bw, by + bh, if (hover) 0xFF59755C.toInt() else 0xFF405D49.toInt())
-            graphics.fill(bx, by, bx + bw, by + 2, 0xFFAA8E62.toInt())
-            graphics.drawCenteredString(font, button.message, bx + bw / 2, by + (bh - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
+            graphics.fill(bx, by, bx + bw, by + 2, border)
+            centered(graphics, button.message.string, bx + bw / 2, by + (bh - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
         }
+        val attributeButtons = children().filterIsInstance<Button>().drop(3)
+        ClientCache.defs.zip(attributeButtons).forEach { (def, button) ->
+            val label = Component.translatable(def.nameKey).string
+            val code = label.filter { it.isLetterOrDigit() }.take(3).uppercase()
+            graphics.drawString(font, code, button.x + 7, button.y + 6, def.color or 0xFF000000.toInt(), false)
+        }
+    }
+
+    private fun centered(graphics: GuiGraphics, label: String, x: Int, y: Int, color: Int) {
+        graphics.drawString(font, label, x - font.width(label) / 2, y, color, false)
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {

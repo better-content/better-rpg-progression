@@ -24,6 +24,13 @@ ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
+modId="better_gameplay_notices"
+mandatory=true
+versionRange="[1.0.0,)"
+ordering="AFTER"
+side="CLIENT"
+
+[[dependencies.${mod_id}]]
 modId="bloodmagic"
 mandatory=false
 versionRange="[3.3.7,3.4)"

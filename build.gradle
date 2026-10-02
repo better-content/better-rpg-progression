@@ -112,6 +112,9 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    compileOnly files(System.getenv('BC_CUSTOM_MOD_JAR_DIR')
+        ? "${System.getenv('BC_CUSTOM_MOD_JAR_DIR')}/better-gameplay-notices-1.0.0.jar"
+        : '../better-gameplay-notices/build/libs/better-gameplay-notices-1.0.0.jar')
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
     implementation fg.deobf("thedarkcolour:kotlinforforge:${kff_version}")
     // The language provider is nested into KotlinForForge at runtime; expose its

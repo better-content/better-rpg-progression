@@ -10,6 +10,7 @@ import com.bettercontent.betterrpgprogression.common.network.Network
 import com.bettercontent.betterrpgprogression.common.network.packets.C2SApplyStats
 import com.bettercontent.betterrpgprogression.common.salience.AspectIdentity
 import com.bettercontent.betterrpgprogression.common.sound.ModSounds
+import com.bettercontent.gameplaynotices.BetterUiTheme
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.components.Button
 import net.minecraft.client.gui.components.Tooltip
@@ -102,27 +103,31 @@ internal object StatsPropertyVisibility {
     }
 }
 
-class StatsScreen : Screen(Component.translatable("screen.better_rpg_progression.title")) {
+class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null) : Screen(Component.translatable("screen.better_rpg_progression.title")) {
     private companion object {
         const val PROPERTY_ROW_HEIGHT = 22
         const val CONTROL_WIDTH = 62
         val DEFAULT_FONT = ResourceLocation("minecraft", "default")
 
-        const val PANEL_BORDER = 0xFFAA8E62.toInt()
-        const val PANEL_BACKGROUND = 0xFFECDFBD.toInt()
-        const val SUMMARY_BACKGROUND = 0xFFE4D5AF.toInt()
-        const val HEADER_BACKGROUND = 0xFFDDCCA4.toInt()
-        const val ROW_BACKGROUND = 0xFFF5EBD3.toInt()
-        const val ROW_ALTERNATE = 0xFFEDE0C2.toInt()
-        const val ROW_HOVER = 0xFFD9CEAE.toInt()
-        const val RULE_COLOR = 0xFFBDA479.toInt()
-        const val PRIMARY_TEXT = 0xFF30483E.toInt()
-        const val SECONDARY_TEXT = 0xFF776C55.toInt()
-        const val PENDING_UP = 0xFF386C47.toInt()
-        const val PENDING_DOWN = 0xFF994A3B.toInt()
+        val PANEL_BORDER get() = BetterUiTheme.color(0xFFAA8E62.toInt(), 0xFF987750.toInt())
+        val PANEL_BACKGROUND get() = BetterUiTheme.color(0xFFECDFBD.toInt(), 0xFF182B26.toInt())
+        val SUMMARY_BACKGROUND get() = BetterUiTheme.color(0xFFE4D5AF.toInt(), 0xFF263A30.toInt())
+        val HEADER_BACKGROUND get() = BetterUiTheme.color(0xFFDDCCA4.toInt(), 0xFF314F3E.toInt())
+        val ROW_BACKGROUND get() = BetterUiTheme.color(0xFFF5EBD3.toInt(), 0xFF263A30.toInt())
+        val ROW_ALTERNATE get() = BetterUiTheme.color(0xFFEDE0C2.toInt(), 0xFF2D4237.toInt())
+        val ROW_HOVER get() = BetterUiTheme.color(0xFFD9CEAE.toInt(), 0xFF405E4A.toInt())
+        val RULE_COLOR get() = BetterUiTheme.color(0xFFBDA479.toInt(), 0xFF987750.toInt())
+        val PRIMARY_TEXT get() = BetterUiTheme.color(0xFF30483E.toInt(), 0xFFF4E6C7.toInt())
+        val SECONDARY_TEXT get() = BetterUiTheme.color(0xFF776C55.toInt(), 0xFFC4B99E.toInt())
+        val PENDING_UP get() = BetterUiTheme.color(0xFF386C47.toInt(), 0xFF8DD69B.toInt())
+        val PENDING_DOWN get() = BetterUiTheme.color(0xFF994A3B.toInt(), 0xFFF2A899.toInt())
     }
 
     private data class Row(val def: ClientStatDef, var plus: Button? = null, var minus: Button? = null)
+
+    override fun onClose() {
+        minecraft?.setScreen(returnTo)
+    }
 
     private data class PropertyProvider(
         val attributeId: String,
@@ -264,9 +269,12 @@ class StatsScreen : Screen(Component.translatable("screen.better_rpg_progression
             val x = button.x; val y = button.y; val w = button.width; val h = button.height
             val hover = mouseX in x until (x + w) && mouseY in y until (y + h)
             guiGraphics.fill(x, y, x + w, y + h,
-                if (!button.active) 0xFF849382.toInt() else if (hover) 0xFF59755C.toInt() else 0xFF405D49.toInt())
+                if (!button.active) BetterUiTheme.color(0xFF849382.toInt(), 0xFF4B5E50.toInt())
+                else if (hover) BetterUiTheme.color(0xFF59755C.toInt(), 0xFF547B61.toInt())
+                else BetterUiTheme.color(0xFF405D49.toInt(), 0xFF314F3E.toInt()))
             guiGraphics.fill(x, y, x + w, y + 2, PANEL_BORDER)
-            guiGraphics.drawCenteredString(font, button.message, x + w / 2, y + (h - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
+            guiGraphics.drawString(font, button.message, x + (w - font.width(button.message)) / 2,
+                y + (h - font.lineHeight) / 2, 0xFFF9EFD7.toInt(), false)
         }
         drawTooltip(guiGraphics, layout, mouseX, mouseY)
     }
@@ -327,11 +335,17 @@ class StatsScreen : Screen(Component.translatable("screen.better_rpg_progression
                     StatsScreenLayoutPolicy.BADGE_SIZE
                 )
             }
-            val textX = if (aspect == null) rowX + 6 else rowX + StatsScreenLayoutPolicy.BADGE_X +
+            val badgeX = if (aspect == null) rowX + 6 else rowX + StatsScreenLayoutPolicy.BADGE_X +
                 StatsScreenLayoutPolicy.BADGE_SIZE + StatsScreenLayoutPolicy.BADGE_TEXT_GAP
+            val statName = Component.translatable(row.def.nameKey).string
+            val abbreviation = statName.filter { it.isLetterOrDigit() }.take(3).uppercase().ifEmpty { "STA" }
+            guiGraphics.fill(badgeX, rowY + 2, badgeX + 23, rowY + 14,
+                BetterUiTheme.color(0xFF30483E.toInt(), 0xFF162720.toInt()))
+            guiGraphics.drawString(font, abbreviation, badgeX + 2, rowY + 4, opaque(row.def.color), false)
+            val textX = badgeX + 27
             val maxNameWidth = rowX + layout.attributeTileWidth - CONTROL_WIDTH - 4 - textX
             guiGraphics.enableScissor(textX, rowY, textX + maxNameWidth, rowY + 13)
-            guiGraphics.drawString(font, Component.translatable(row.def.nameKey),
+            guiGraphics.drawString(font, statName,
                 textX, rowY + 3, PRIMARY_TEXT, false)
             guiGraphics.disableScissor()
             val points = workingAlloc[row.def.id] ?: 0
@@ -350,8 +364,9 @@ class StatsScreen : Screen(Component.translatable("screen.better_rpg_progression
             layout.propertyTop + layout.propertyViewportHeight)
         if (properties.isEmpty()) {
             val empty = Component.translatable("screen.better_rpg_progression.no_properties").string
-            guiGraphics.drawCenteredString(font, ellipsize(empty, layout.contentWidth - 16),
-                layout.contentX + layout.contentWidth / 2, layout.propertyTop + 6, SECONDARY_TEXT)
+            val label = ellipsize(empty, layout.contentWidth - 16)
+            guiGraphics.drawString(font, label, layout.contentX + (layout.contentWidth - font.width(label)) / 2,
+                layout.propertyTop + 6, SECONDARY_TEXT, false)
         }
         properties.forEachIndexed { index, property ->
             val rowY = layout.propertyTop + index * PROPERTY_ROW_HEIGHT - rightScrollOffset.toInt()
