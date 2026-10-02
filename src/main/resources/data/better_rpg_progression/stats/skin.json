@@ -1,5 +1,5 @@
 {
-  "name_key": "stat.better_rpg_progression.fortitude",
+  "name_key": "stat.better_rpg_progression.skin",
   "order": 60,
   "icon": "◆",
   "color": "#AF6A2F",
@@ -8,7 +8,13 @@
       "type": "attribute",
       "attribute": "cold_sweat:heat_resistance",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.6, "k": 20.0, "min": 0.0, "max": 0.6 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.6,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.6
+      },
       "is_primary": true,
       "display_as_percent": true,
       "requires_mod": "cold_sweat"
@@ -17,7 +23,13 @@
       "type": "attribute",
       "attribute": "cold_sweat:cold_resistance",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.6, "k": 20.0, "min": 0.0, "max": 0.6 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.6,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.6
+      },
       "is_primary": false,
       "display_as_percent": true,
       "requires_mod": "cold_sweat"
@@ -26,7 +38,13 @@
       "type": "attribute",
       "attribute": "minecraft:generic.knockback_resistance",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.15, "k": 20.0, "min": 0.0, "max": 0.15 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.15,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.15
+      },
       "is_primary": false
     }
   ]

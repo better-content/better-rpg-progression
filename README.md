@@ -4,9 +4,9 @@ Pack-owned RPG stats and diminishing-returns system for Forge `1.20.1`.
 
 ## Life aspects
 
-Players commit Life points irreversibly during a life to eight broad capabilities: Impact, Tempo, Work, Mobility, Endurance, Robustness, Renewal, and Control. One aspect may project into several concrete attributes owned by vanilla, Epic Fight, TConstruct, TACZ, Goety, Cold Sweat, or this mod; those integrations do not share a global aspect meter. Twenty points reach half of each configured cap through the `cap × points / (points + 20)` curve, and death clears the allocation ledger. Impact supplies a bounded percentage to direct player, projectile, and player-attributed spell damage once at the server damage boundary; owned creatures and environmental damage remain outside that channel.
+Players commit Life points irreversibly during a life to Arms, Hands, Fingers, Lungs, Blood, Skin, Liver, and Eyes. Each stat maps respectively to the Impact, Tempo, Work, Mobility, Endurance, Robustness, Renewal, and Control aspects. One aspect may project into several concrete attributes owned by vanilla, Epic Fight, TConstruct, TACZ, Goety, Cold Sweat, or this mod; those integrations do not share a global aspect meter. Twenty points reach half of each configured cap through the `cap × points / (points + 20)` curve, and death clears the allocation ledger. Arms supplies a bounded percentage to direct player, projectile, and player-attributed spell damage once at the server damage boundary; owned creatures and environmental damage remain outside that channel.
 
-The stat resources use the same portable glyph and CVD-screened color contract as nutrition and pack-authored TConstruct material profiles. The allocation screen keeps all eight capabilities visible in a fixed two-column grid; only the resulting-property list scrolls, and properties with no committed or draft effect are omitted.
+The stat badges use body-part pixel art while retaining the aspect colors and audio motifs shared with nutrition and ore geology. Lungs also increases underwater air capacity toward twice vanilla capacity. The allocation screen keeps all eight capabilities visible in a fixed two-column grid; only the resulting-property list scrolls, and properties with no committed or draft effect are omitted.
 
 
 ## Heart fragments

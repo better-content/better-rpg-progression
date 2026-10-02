@@ -6,6 +6,7 @@
   "refmap": "better_rpg_progression.refmap.json",
   "mixins": [
     "FoodDataMixin",
+    "EntityAirSupplyMixin",
     "LivingEntityEffectMixin",
     "PlayerMixin",
     "ProjectileFocusMixin",

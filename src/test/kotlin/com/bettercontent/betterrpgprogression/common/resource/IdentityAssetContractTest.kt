@@ -24,11 +24,13 @@ class IdentityAssetContractTest {
 
     @Test
     fun `badge font and motifs cover the exact identity contract`() {
-        val badge = resource("/assets/better_rpg_progression/textures/gui/aspect_badges.png")
-        assertEquals("84bc0c5fe762fe2df5f1ed53a2e138ecb03bbfbb386657039ad8333927bf51ab",
+        assertEquals(listOf("arms", "hands", "fingers", "lungs", "blood", "skin", "liver", "eyes"),
+            AspectIdentity.entries.map { it.statId })
+        val badge = resource("/assets/better_rpg_progression/textures/gui/stat_badges.png")
+        assertEquals("44bca8862f44432b70ea5066fa59f2973ac42fb9f3089bfb3ce0557a2b19527b",
             HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(badge)))
         ImageIO.read(badge.inputStream()).also { image -> assertEquals(144, image.width); assertEquals(18, image.height) }
-        val font = resource("/assets/better_rpg_progression/font/aspects.json").decodeToString()
+        val font = resource("/assets/better_rpg_progression/font/stats.json").decodeToString()
         assertTrue(font.contains(""))
         val sounds = resource("/assets/better_rpg_progression/sounds.json").decodeToString()
         AspectIdentity.entries.forEachIndexed { index, aspect ->

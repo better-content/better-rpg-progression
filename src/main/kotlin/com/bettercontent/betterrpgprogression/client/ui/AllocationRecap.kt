@@ -38,7 +38,7 @@ object AllocationRecap {
         val width = minecraft.font.width(line) + 12
         val x = (event.window.guiScaledWidth - width) / 2
         val y = event.window.guiScaledHeight - 96 - ((1f - fade) * 8).toInt()
-        event.guiGraphics.fill(x, y, x + width, y + 18, ((170 * fade).toInt() shl 24) or 0x101318)
+        event.guiGraphics.fill(x, y - 10, x + width, y + 18, ((170 * fade).toInt() shl 24) or 0x101318)
         event.guiGraphics.drawString(minecraft.font, line, x + 6, y + 5,
             ((255 * fade).toInt() shl 24) or 0xFFFFFF, false)
     }
@@ -50,7 +50,11 @@ object AllocationRecap {
             if (index > 0) result.append(Component.literal(" · ").withStyle { it.withColor(0x777777) })
             val aspect = AspectIdentity.fromStatId(id)
             val natural = defs[id]?.let { Component.translatable(it.nameKey).string } ?: id.substringAfter(':')
-            val label = if (aspect == null) "$natural +$amount" else "$natural — ${aspect.label} +$amount"
+            if (aspect != null) {
+                result.append(Component.literal(aspect.badge).withStyle { it.withFont(AspectIdentity.FONT) })
+                result.append(Component.literal(" "))
+            }
+            val label = if (aspect == null) "$natural +$amount" else "$natural — ${aspect.title} +$amount"
             result.append(Component.literal(label).withStyle { it.withColor(aspect?.color ?: 0xFFFFFF) })
         }
         return result

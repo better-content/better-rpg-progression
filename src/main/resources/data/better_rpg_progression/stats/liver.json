@@ -1,5 +1,5 @@
 {
-  "name_key": "stat.better_rpg_progression.vitality",
+  "name_key": "stat.better_rpg_progression.liver",
   "order": 70,
   "icon": "✚",
   "color": "#6CCAF0",
@@ -8,7 +8,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:harmful_effect_duration_reduction",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.25, "k": 20.0, "min": 0.0, "max": 0.25 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.25,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.25
+      },
       "is_primary": true,
       "display_as_percent": true
     },
@@ -16,7 +22,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:beneficial_effect_duration",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.25, "k": 20.0, "min": 0.0, "max": 0.25 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.25,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.25
+      },
       "is_primary": false,
       "display_as_percent": true
     }

@@ -122,36 +122,36 @@ object RpgStatsVisualHarness {
     private fun seedFixture() {
         ClientCache.defs = listOf(
             stat(
-                "impact", "✦", 0xE4717D,
+                "arms", "✦", 0xFF4055,
                 effect("minecraft:generic.attack_damage", 0, 6.0),
                 effect("epicfight:impact", 0, 0.75, primary = false),
                 effect("minecraft:generic.attack_knockback", 0, 0.4, primary = false)
             ),
             stat(
-                "tempo", "»", 0xAA652B,
+                "hands", "»", 0x00A985,
                 effect("minecraft:generic.attack_speed", 0, 0.6),
                 effect("tconstruct:player.use_item_speed", 1, 0.25, primary = false)
             ),
-            stat("work", "⚒", 0xCAA903, effect("better_rpg_progression:mining_speed", 1, 0.75), effect("forge:block_reach", 0, 1.0, primary = false)),
-            stat("mobility", "➜", 0xC0E304, effect("minecraft:generic.movement_speed", 0, 0.05), effect("forge:swim_speed", 1, 0.25, primary = false)),
+            stat("fingers", "⚒", 0xF0E2C5, effect("better_rpg_progression:mining_speed", 1, 0.75), effect("forge:block_reach", 0, 1.0, primary = false)),
+            stat("lungs", "➜", 0xE0B01F, effect("minecraft:generic.movement_speed", 0, 0.05), effect("forge:swim_speed", 1, 0.25, primary = false), effect("forge:step_height_addition", 0, 0.5, primary = false), effect("better_rpg_progression:air_capacity", 1, 1.0, primary = false)),
             stat(
-                "endurance", "∞", 0x35BBD0,
+                "blood", "∞", 0x52606A,
                 effect("better_rpg_progression:hunger_efficiency", 1, 1.0),
                 effect("better_rpg_progression:thirst_efficiency", 1, 1.0, primary = false),
                 effect("epicfight:staminar", 1, 0.3, primary = false)
             ),
             stat(
-                "robustness", "◆", 0x1175FC,
+                "skin", "◆", 0xAF6A2F,
                 effect("cold_sweat:heat_resistance", 0, 0.6, displayAsPercent = true),
                 effect("cold_sweat:cold_resistance", 0, 0.6, primary = false, displayAsPercent = true)
             ),
             stat(
-                "renewal", "✚", 0x6FEDBA,
+                "liver", "✚", 0x6CCAF0,
                 effect("better_rpg_progression:harmful_effect_duration_reduction", 0, 0.25, displayAsPercent = true),
                 effect("better_rpg_progression:beneficial_effect_duration", 0, 0.25, primary = false, displayAsPercent = true)
             ),
             stat(
-                "control", "⊕", 0x8A6CB2,
+                "eyes", "⊕", 0x8E5BB7,
                 effect("better_rpg_progression:arrow_spread_reduction", 0, 0.35, displayAsPercent = true),
                 effect("better_rpg_progression:arrow_speed_bonus", 0, 0.08, primary = false, displayAsPercent = true),
                 effect("better_rpg_progression:recoil_reduction", 0, 0.35, primary = false, displayAsPercent = true),
@@ -167,14 +167,14 @@ object RpgStatsVisualHarness {
             unspent = 4,
             lifePeak = 27,
             allocations = mapOf(
-                "better_rpg_progression:impact" to 4,
-                "better_rpg_progression:tempo" to 2,
-                "better_rpg_progression:work" to 3,
-                "better_rpg_progression:mobility" to 1,
-                "better_rpg_progression:endurance" to 2,
-                "better_rpg_progression:robustness" to 2,
-                "better_rpg_progression:renewal" to 2,
-                "better_rpg_progression:control" to 1
+                "better_rpg_progression:arms" to 4,
+                "better_rpg_progression:hands" to 2,
+                "better_rpg_progression:fingers" to 3,
+                "better_rpg_progression:lungs" to 1,
+                "better_rpg_progression:blood" to 2,
+                "better_rpg_progression:skin" to 2,
+                "better_rpg_progression:liver" to 2,
+                "better_rpg_progression:eyes" to 1
             )
         )
     }
@@ -190,14 +190,14 @@ object RpgStatsVisualHarness {
         )
 
     private val visibleNames = mapOf(
-        "impact" to "strength",
-        "tempo" to "dexterity",
-        "work" to "aptitude",
-        "mobility" to "agility",
-        "endurance" to "constitution",
-        "robustness" to "fortitude",
-        "renewal" to "vitality",
-        "control" to "focus"
+        "arms" to "arms",
+        "hands" to "hands",
+        "fingers" to "fingers",
+        "lungs" to "lungs",
+        "blood" to "blood",
+        "skin" to "skin",
+        "liver" to "liver",
+        "eyes" to "eyes"
     )
 
     private fun effect(

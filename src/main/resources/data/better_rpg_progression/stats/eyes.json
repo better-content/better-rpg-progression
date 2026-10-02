@@ -1,5 +1,5 @@
 {
-  "name_key": "stat.better_rpg_progression.focus",
+  "name_key": "stat.better_rpg_progression.eyes",
   "order": 80,
   "icon": "⊕",
   "color": "#8E5BB7",
@@ -8,7 +8,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:arrow_spread_reduction",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.35, "k": 20.0, "min": 0.0, "max": 0.35 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.35,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.35
+      },
       "is_primary": true,
       "display_as_percent": true
     },
@@ -16,7 +22,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:arrow_speed_bonus",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.08, "k": 20.0, "min": 0.0, "max": 0.08 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.08,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.08
+      },
       "is_primary": false,
       "display_as_percent": true
     },
@@ -24,7 +36,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:recoil_reduction",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.35, "k": 20.0, "min": 0.0, "max": 0.35 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.35,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.35
+      },
       "is_primary": false,
       "display_as_percent": true,
       "requires_mod": "tacz"
@@ -33,7 +51,13 @@
       "type": "attribute",
       "attribute": "better_rpg_progression:dispersion_reduction",
       "operation": "add",
-      "curve": { "type": "hyperbola", "cap": 0.35, "k": 20.0, "min": 0.0, "max": 0.35 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.35,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.35
+      },
       "is_primary": false,
       "display_as_percent": true,
       "requires_mod": "tacz"
@@ -42,7 +66,13 @@
       "type": "attribute",
       "attribute": "goety:spell_range",
       "operation": "multiply_base",
-      "curve": { "type": "hyperbola", "cap": 0.25, "k": 20.0, "min": 0.0, "max": 0.25 },
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.25,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.25
+      },
       "is_primary": false,
       "requires_mod": "goety"
     }

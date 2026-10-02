@@ -23,7 +23,7 @@ public final class EffectSemanticsGameTests {
     private EffectSemanticsGameTests() {}
 
     @GameTest(template = "empty", timeoutTicks = 20)
-    public static void vitalityPreservesWholeIncomingEffect(GameTestHelper helper) {
+    public static void liverPreservesWholeIncomingEffect(GameTestHelper helper) {
         var player = FakePlayerFactory.getMinecraft(helper.getLevel());
         player.removeEffect(MobEffects.MOVEMENT_SPEED);
         player.getAttribute(ModAttributes.INSTANCE.getBENEFICIAL_EFFECT_DURATION().get()).setBaseValue(.25);
@@ -37,8 +37,22 @@ public final class EffectSemanticsGameTests {
         helper.assertTrue(player.addEffect(incoming), "Production addEffect rejected the incoming effect");
         var applied = player.getEffect(MobEffects.MOVEMENT_SPEED);
         helper.assertTrue(applied != null && expected.equals(applied.save(new CompoundTag())),
-            "Vitality changed flags, curatives, hidden state or factor data while scaling duration");
-        helper.assertTrue(incoming.getDuration() == 80, "Vitality mutated the caller's instance");
+            "Liver changed flags, curatives, hidden state or factor data while scaling duration");
+        helper.assertTrue(incoming.getDuration() == 80, "Liver mutated the caller's instance");
+        helper.succeed();
+    }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
+    public static void lungsIncreaseCapacityWithoutRefillingCurrentAir(GameTestHelper helper) {
+        var player = FakePlayerFactory.getMinecraft(helper.getLevel());
+        var attribute = player.getAttribute(ModAttributes.INSTANCE.getAIR_CAPACITY().get());
+        attribute.setBaseValue(1.0);
+        player.setAirSupply(120);
+        helper.assertTrue(player.getMaxAirSupply() == 300, "Baseline air capacity changed");
+        attribute.setBaseValue(1.5);
+        helper.assertTrue(player.getMaxAirSupply() == 450, "Lungs failed to raise air capacity");
+        helper.assertTrue(player.getAirSupply() == 120, "Increasing capacity refilled current air");
+        attribute.setBaseValue(1.0);
         helper.succeed();
     }
 }

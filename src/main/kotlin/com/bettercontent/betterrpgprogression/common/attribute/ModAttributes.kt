@@ -28,6 +28,10 @@ object ModAttributes {
         RangedAttribute("attribute.name.better_rpg_progression.mining_speed", 1.0, 1.0, 1024.0).setSyncable(true)
     }
 
+    val AIR_CAPACITY: RegistryObject<Attribute> = ATTRIBUTES.register("air_capacity") {
+        RangedAttribute("attribute.name.better_rpg_progression.air_capacity", 1.0, 1.0, 2.0).setSyncable(true)
+    }
+
     val RECOIL_REDUCTION: RegistryObject<Attribute> = ATTRIBUTES.register("recoil_reduction") {
         RangedAttribute("attribute.name.better_rpg_progression.recoil_reduction", 0.0, -1.0, 1.0).setSyncable(true)
     }
@@ -68,6 +72,7 @@ object PlayerAttributeRegistration {
         event.add(EntityType.PLAYER, ModAttributes.HUNGER_EFFICIENCY.get())
         event.add(EntityType.PLAYER, ModAttributes.THIRST_EFFICIENCY.get())
         event.add(EntityType.PLAYER, ModAttributes.MINING_SPEED.get())
+        event.add(EntityType.PLAYER, ModAttributes.AIR_CAPACITY.get())
         event.add(EntityType.PLAYER, ModAttributes.RECOIL_REDUCTION.get())
         event.add(EntityType.PLAYER, ModAttributes.DISPERSION_REDUCTION.get())
         event.add(EntityType.PLAYER, ModAttributes.ARROW_SPREAD_REDUCTION.get())

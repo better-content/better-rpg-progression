@@ -22,50 +22,51 @@ class RpgStatsResourceTest {
     )
 
     private val aspects = linkedMapOf(
-        "impact" to AspectContract(10, "#FF4055", "✦", "strength"),
-        "tempo" to AspectContract(20, "#00A985", "»", "dexterity"),
-        "work" to AspectContract(30, "#F0E2C5", "⚒", "aptitude"),
-        "mobility" to AspectContract(40, "#E0B01F", "➜", "agility"),
-        "endurance" to AspectContract(50, "#52606A", "∞", "constitution"),
-        "robustness" to AspectContract(60, "#AF6A2F", "◆", "fortitude"),
-        "renewal" to AspectContract(70, "#6CCAF0", "✚", "vitality"),
-        "control" to AspectContract(80, "#8E5BB7", "⊕", "focus")
+        "arms" to AspectContract(10, "#FF4055", "✦", "arms"),
+        "hands" to AspectContract(20, "#00A985", "»", "hands"),
+        "fingers" to AspectContract(30, "#F0E2C5", "⚒", "fingers"),
+        "lungs" to AspectContract(40, "#E0B01F", "➜", "lungs"),
+        "blood" to AspectContract(50, "#52606A", "∞", "blood"),
+        "skin" to AspectContract(60, "#AF6A2F", "◆", "skin"),
+        "liver" to AspectContract(70, "#6CCAF0", "✚", "liver"),
+        "eyes" to AspectContract(80, "#8E5BB7", "⊕", "eyes")
     )
 
     private val effects = mapOf(
-        "impact" to mapOf(
+        "arms" to mapOf(
             "better_rpg_progression:outgoing_damage" to EffectContract(0.6, "multiply_base"),
             "epicfight:impact" to EffectContract(0.75, "add", "epicfight"),
             "minecraft:generic.attack_knockback" to EffectContract(0.4, "add")
         ),
-        "tempo" to mapOf(
+        "hands" to mapOf(
             "minecraft:generic.attack_speed" to EffectContract(0.6, "add"),
             "tconstruct:player.use_item_speed" to EffectContract(0.25, "multiply_base", "tconstruct")
         ),
-        "work" to mapOf(
+        "fingers" to mapOf(
             "better_rpg_progression:mining_speed" to EffectContract(0.75, "multiply_base"),
             "forge:block_reach" to EffectContract(1.0, "add")
         ),
-        "mobility" to mapOf(
+        "lungs" to mapOf(
             "minecraft:generic.movement_speed" to EffectContract(0.05, "add"),
             "forge:swim_speed" to EffectContract(0.25, "multiply_base"),
-            "forge:step_height_addition" to EffectContract(0.5, "add")
+            "forge:step_height_addition" to EffectContract(0.5, "add"),
+            "better_rpg_progression:air_capacity" to EffectContract(1.0, "multiply_base")
         ),
-        "endurance" to mapOf(
+        "blood" to mapOf(
             "better_rpg_progression:hunger_efficiency" to EffectContract(1.0, "multiply_base"),
             "better_rpg_progression:thirst_efficiency" to EffectContract(1.0, "multiply_base"),
             "epicfight:staminar" to EffectContract(0.3, "multiply_base", "epicfight")
         ),
-        "robustness" to mapOf(
+        "skin" to mapOf(
             "cold_sweat:heat_resistance" to EffectContract(0.6, "add", "cold_sweat", true),
             "cold_sweat:cold_resistance" to EffectContract(0.6, "add", "cold_sweat", true),
             "minecraft:generic.knockback_resistance" to EffectContract(0.15, "add")
         ),
-        "renewal" to mapOf(
+        "liver" to mapOf(
             "better_rpg_progression:harmful_effect_duration_reduction" to EffectContract(0.25, "add", displayAsPercent = true),
             "better_rpg_progression:beneficial_effect_duration" to EffectContract(0.25, "add", displayAsPercent = true)
         ),
-        "control" to mapOf(
+        "eyes" to mapOf(
             "better_rpg_progression:arrow_spread_reduction" to EffectContract(0.35, "add", displayAsPercent = true),
             "better_rpg_progression:arrow_speed_bonus" to EffectContract(0.08, "add", displayAsPercent = true),
             "better_rpg_progression:recoil_reduction" to EffectContract(0.35, "add", "tacz", true),

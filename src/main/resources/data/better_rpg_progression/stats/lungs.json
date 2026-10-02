@@ -1,0 +1,60 @@
+{
+  "name_key": "stat.better_rpg_progression.lungs",
+  "order": 40,
+  "icon": "➜",
+  "color": "#E0B01F",
+  "effects": [
+    {
+      "type": "attribute",
+      "attribute": "minecraft:generic.movement_speed",
+      "operation": "add",
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.05,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.05
+      },
+      "is_primary": true
+    },
+    {
+      "type": "attribute",
+      "attribute": "forge:swim_speed",
+      "operation": "multiply_base",
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.25,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.25
+      },
+      "is_primary": false
+    },
+    {
+      "type": "attribute",
+      "attribute": "forge:step_height_addition",
+      "operation": "add",
+      "curve": {
+        "type": "hyperbola",
+        "cap": 0.5,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 0.5
+      },
+      "is_primary": false
+    },
+    {
+      "type": "attribute",
+      "attribute": "better_rpg_progression:air_capacity",
+      "operation": "multiply_base",
+      "curve": {
+        "type": "hyperbola",
+        "cap": 1.0,
+        "k": 20.0,
+        "min": 0.0,
+        "max": 1.0
+      },
+      "is_primary": false
+    }
+  ]
+}
