@@ -17,12 +17,19 @@ object InventoryStatsOverlay {
     private const val INVENTORY_IMAGE_WIDTH = 176
     private const val EFFECT_PANEL_WIDTH = 120
     private const val COMPACT_EFFECT_PANEL_WIDTH = 32
+    private var journalPanelHost = java.util.function.Predicate<net.minecraft.client.gui.screens.Screen> { false }
+
+    /** Optional presentation cooperation; native inventory and gameplay remain untouched. */
+    @JvmStatic
+    fun setJournalPanelHost(host: java.util.function.Predicate<net.minecraft.client.gui.screens.Screen>) {
+        journalPanelHost = host
+    }
 
     @SubscribeEvent
     fun onInventoryForeground(event: ContainerScreenEvent.Render.Foreground) {
         val screen = event.containerScreen
         if (screen !is InventoryScreen) return
-        if (screen.javaClass.name == "com.bettercontent.betterjournalinventory.JournalInventoryScreen") return
+        if (journalPanelHost.test(screen)) return
 
         val defs = ClientCache.defs
         if (defs.isEmpty()) return
