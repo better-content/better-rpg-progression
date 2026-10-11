@@ -1,4 +1,13 @@
 pluginManagement {
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'org.parchmentmc.librarian.forgegradle') {
+                // Pin the implementation as well as the marker; snapshot markers otherwise
+                // depend on a floating -SNAPSHOT implementation even with a dated marker.
+                useModule("org.parchmentmc:librarian:${requested.version}")
+            }
+        }
+    }
     repositories {
         gradlePluginPortal()
         maven { url = 'https://maven.minecraftforge.net/' }
