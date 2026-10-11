@@ -1,5 +1,11 @@
 # Better RPG Progression
 
+## Scope and authority
+
+This repository owns its mod-specific behavior and authoring inputs. Read [local instructions](AGENTS.md)
+and the [shared documentation/policy index](../../better-content-modpack/docs/README.md).
+
+
 Pack-owned RPG stats and diminishing-returns system for Forge `1.20.1`.
 
 ## Life aspects
