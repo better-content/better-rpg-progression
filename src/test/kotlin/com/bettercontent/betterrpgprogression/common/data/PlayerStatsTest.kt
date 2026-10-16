@@ -22,6 +22,57 @@ class PlayerStatsTest {
     }
 
     @Test
+    fun `death clone retains plan preferences but wipes Life state on the new instance`() {
+        for (enabled in listOf(false, true)) {
+            val original = PlayerStats().apply {
+                autoAllocationEnabled = enabled
+                autoAllocationCursor = 1
+                autoAllocationPlan += listOf("better_rpg_progression:arms", "", "better_rpg_progression:hands")
+                lifePeakLevel = 42
+                unspentPoints = 3
+                lifeAllocationEpisode = "old-life"
+                allocations["better_rpg_progression:arms"] = 8
+            }
+            val replacement = PlayerStats()
+
+            replacement.copyForRespawnFrom(original, wasDeath = true, currentLevel = 7)
+
+            assertEquals(enabled, replacement.autoAllocationEnabled)
+            assertEquals(1, replacement.autoAllocationCursor)
+            assertEquals(original.autoAllocationPlan, replacement.autoAllocationPlan)
+            assertEquals(7, replacement.lifePeakLevel)
+            assertEquals(0, replacement.unspentPoints)
+            assertEquals(null, replacement.lifeAllocationEpisode)
+            assertTrue(replacement.allocations.isEmpty())
+            replacement.autoAllocationPlan.clear()
+            assertEquals(3, original.autoAllocationPlan.size)
+            assertEquals(8, original.allocations["better_rpg_progression:arms"])
+        }
+    }
+
+    @Test
+    fun `non death clone preserves Life ledger and copies mutable collections`() {
+        val original = PlayerStats().apply {
+            autoAllocationEnabled = true
+            autoAllocationCursor = 2
+            autoAllocationPlan += "better_rpg_progression:arms"
+            lifePeakLevel = 42
+            unspentPoints = 3
+            lifeAllocationEpisode = "same-life"
+            allocations["better_rpg_progression:arms"] = 8
+        }
+        val replacement = PlayerStats()
+
+        replacement.copyForRespawnFrom(original, wasDeath = false, currentLevel = 7)
+
+        assertEquals(original.serializeNBT(), replacement.serializeNBT())
+        replacement.allocations.clear()
+        replacement.autoAllocationPlan.clear()
+        assertEquals(8, original.allocations["better_rpg_progression:arms"])
+        assertEquals(1, original.autoAllocationPlan.size)
+    }
+
+    @Test
     fun `auto plan serializes separately from Life points`() {
         val stats = PlayerStats().apply {
             autoAllocationEnabled = true

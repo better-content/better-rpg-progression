@@ -18,6 +18,24 @@ class PlayerStats {
 
     fun totalPointsThisLife(): Int = unspentPoints + totalAllocated()
 
+    /** Copy character preferences on every clone; only a final death wipes the Life ledger. */
+    fun copyForRespawnFrom(original: PlayerStats, wasDeath: Boolean, currentLevel: Int) {
+        autoAllocationEnabled = original.autoAllocationEnabled
+        autoAllocationCursor = original.autoAllocationCursor
+        autoAllocationPlan.clear()
+        autoAllocationPlan.addAll(original.autoAllocationPlan)
+        if (wasDeath) {
+            // Avoid instant refunds under keep-XP rules.
+            resetForDeath(currentLevel)
+        } else {
+            lifePeakLevel = original.lifePeakLevel
+            unspentPoints = original.unspentPoints
+            lifeAllocationEpisode = original.lifeAllocationEpisode
+            allocations.clear()
+            allocations.putAll(original.allocations)
+        }
+    }
+
     fun resetForDeath(currentLevel: Int) {
         lifePeakLevel = currentLevel.coerceAtLeast(0)
         unspentPoints = 0

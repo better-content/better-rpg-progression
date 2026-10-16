@@ -53,28 +53,27 @@ object CommonForgeEvents {
         val oldP = event.original
         val newP = event.entity
 
+        // Forge invalidates the original player's capabilities before the clone event.
+        // Read them while revived, then restore the original's invalid lifecycle state.
+        oldP.reviveCaps()
+        try {
+            oldP.getCapability(StatsCap.CAP).ifPresent { oldStats ->
+                newP.getCapability(StatsCap.CAP).ifPresent { newStats ->
+                    newStats.copyForRespawnFrom(oldStats, event.isWasDeath,
+                        (newP as? ServerPlayer)?.experienceLevel ?: 0)
+                }
+            }
+        } finally {
+            oldP.invalidateCaps()
+        }
+
         if (event.isWasDeath) {
-            newP.getCapability(StatsCap.CAP).ifPresent { newStats ->
-                // Wipe, but baseline peak to current XP level to avoid instant refunds on keep-XP rules.
-                newStats.resetForDeath((newP as? ServerPlayer)?.experienceLevel ?: 0)
+            newP.getCapability(StatsCap.CAP).ifPresent { _ ->
                 if (newP is ServerPlayer && oldP.persistentData.getBoolean(LOST_ALLOCATION_TAG)) {
                     oldP.persistentData.remove(LOST_ALLOCATION_TAG)
                     com.bettercontent.betterrpgprogression.common.points.LifeAllocationEvents.post(newP,
                         com.bettercontent.betterrpgprogression.api.event.LifeAllocationEvent.State.LOST_ON_DEATH,
                         com.bettercontent.betterrpgprogression.common.points.LifeAllocationEvents.newEpisode(newP))
-                }
-            }
-        } else {
-            oldP.getCapability(StatsCap.CAP).ifPresent { oldStats ->
-                newP.getCapability(StatsCap.CAP).ifPresent { newStats ->
-                    newStats.lifePeakLevel = oldStats.lifePeakLevel
-                    newStats.unspentPoints = oldStats.unspentPoints
-                    newStats.allocations.clear()
-                    newStats.allocations.putAll(oldStats.allocations)
-                    newStats.autoAllocationEnabled = oldStats.autoAllocationEnabled
-                    newStats.autoAllocationCursor = oldStats.autoAllocationCursor
-                    newStats.autoAllocationPlan.clear()
-                    newStats.autoAllocationPlan.addAll(oldStats.autoAllocationPlan)
                 }
             }
         }
