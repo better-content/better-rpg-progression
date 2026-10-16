@@ -10,9 +10,9 @@ Pack-owned RPG stats and diminishing-returns system for Forge `1.20.1`.
 
 ## Life aspects
 
-Players commit Life points irreversibly during a life to Arms, Hands, Fingers, Lungs, Blood, Skin, Liver, and Eyes. Each stat maps respectively to the Impact, Tempo, Work, Mobility, Endurance, Robustness, Renewal, and Control aspects. One aspect may project into several concrete attributes owned by vanilla, Epic Fight, TConstruct, TACZ, Goety, Cold Sweat, or this mod; those integrations do not share a global aspect meter. Twenty points reach half of each configured cap through the `cap × points / (points + 20)` curve, and death clears the allocation ledger. Arms supplies a bounded percentage to direct player, projectile, and player-attributed spell damage once at the server damage boundary; owned creatures and environmental damage remain outside that channel.
+Players commit Life points irreversibly during a life to Strength, Hand Speed, Tool Handling, Athletics, Endurance, Hardiness, Detoxification, and Marksmanship. Each stat maps respectively to the Impact, Tempo, Work, Mobility, Endurance, Robustness, Renewal, and Control aspects. One aspect may project into several concrete attributes owned by vanilla, Epic Fight, TConstruct, TACZ, Goety, Cold Sweat, or this mod; those integrations do not share a global aspect meter. Twenty points reach half of each configured cap through the `cap × points / (points + 20)` curve, and death clears the allocation ledger. Strength supplies a bounded percentage to direct player, projectile, and player-attributed spell damage once at the server damage boundary; owned creatures and environmental damage remain outside that channel.
 
-The stat badges use body-part pixel art while retaining the aspect colors and audio motifs shared with nutrition and ore geology. Lungs also increases underwater air capacity toward twice vanilla capacity. The allocation screen keeps all eight capabilities visible in a fixed two-column grid; only the resulting-property list scrolls, and properties with no committed or draft effect are omitted.
+The capability names describe their practical use; body-part badges, stable stat IDs, aspect colors, and audio motifs retain the shared identity with nutrition and ore geology. Strength increases damage and knockback; Hand Speed increases attack and item-use speed; Tool Handling improves mining and reach; Athletics improves movement and breathing; Endurance conserves food and water and increases stamina; Hardiness resists temperature and knockback; Detoxification shortens harmful effects and extends beneficial ones without granting healing; Marksmanship improves projectile handling and supported spell range. Athletics also increases underwater air capacity toward twice vanilla capacity. The allocation screen keeps all eight capabilities visible in a fixed two-column grid; only the resulting-property list scrolls, and properties with no committed or draft effect are omitted.
 
 
 ## Heart fragments
@@ -41,7 +41,7 @@ runtime, and development harness code, run:
 The client captures the seeded stats screen at GUI scales 3 and 2, writes screenshots under
 `run-visual-harness/screenshots/`, continues through its identity/audio fixtures, and exits automatically.
 
-`verifyFull` currently matches `verifyFast`; this repo does not yet expose a distinct GameTest or coverage-enforced full lane.
+`verifyFull` runs `verifyFast` plus the transformed production GameTest server, including capability-clone and effect-semantics regressions.
 
 ## Release artifact
 

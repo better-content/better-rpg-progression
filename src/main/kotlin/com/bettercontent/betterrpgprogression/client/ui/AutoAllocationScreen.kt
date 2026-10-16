@@ -74,6 +74,7 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
         val mid = width / 2
         val visible = (pageWidth - 24) / cardWidth
         val half = visible / 2
+        var hoveredEntry: Component? = null
         for (offset in -half..half) {
             val level = centeredLevel + offset
             if (level !in 1..AutoAllocationPlan.MAX_ENTRIES) continue
@@ -85,7 +86,11 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
                 else BetterUiTheme.color(0xFFD7C8A7.toInt(), 0xFF2D4237.toInt()))
             centered(graphics, "Lv $level", cardX + 22, timelineY + 4, ink)
             val definition = ClientCache.defs.firstOrNull { it.id == assigned }
-            val name = definition?.let { Component.translatable(it.nameKey).string }
+            val entryLabel = definition?.let { Component.translatable(it.nameKey) }
+            val name = entryLabel?.string
+            if (mouseX in cardX until (cardX + cardWidth - 3) && mouseY in timelineY until (timelineY + 42)) {
+                hoveredEntry = entryLabel
+            }
             val entryColor = definition?.let { it.color or 0xFF000000.toInt() } ?: ink
             centered(graphics, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22, timelineY + 22, entryColor)
         }
@@ -105,6 +110,7 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
             val code = label.filter { it.isLetterOrDigit() }.take(3).uppercase()
             graphics.drawString(font, code, button.x + 7, button.y + 6, def.color or 0xFF000000.toInt(), false)
         }
+        hoveredEntry?.let { graphics.renderTooltip(font, it, mouseX, mouseY) }
     }
 
     private fun centered(graphics: GuiGraphics, label: String, x: Int, y: Int, color: Int) {
