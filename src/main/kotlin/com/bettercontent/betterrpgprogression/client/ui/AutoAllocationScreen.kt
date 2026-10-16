@@ -44,7 +44,7 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
         val buttonWidth = minOf(230, pageWidth - 40)
         val xButton = width / 2 - buttonWidth / 2
         definitions.forEachIndexed { index, def ->
-            val label = Component.translatable(def.nameKey)
+            val label = Component.translatable(def.nameKey).withStyle { it.withColor(def.color and 0xFFFFFF) }
             addRenderableWidget(Button.builder(label) {
                 val slot = centeredLevel - 1
                 while (plan.size <= slot) plan.add("")
@@ -84,8 +84,10 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
                 if (level == centeredLevel) BetterUiTheme.color(0xFFBCCDAF.toInt(), 0xFF547B61.toInt())
                 else BetterUiTheme.color(0xFFD7C8A7.toInt(), 0xFF2D4237.toInt()))
             centered(graphics, "Lv $level", cardX + 22, timelineY + 4, ink)
-            val name = ClientCache.defs.firstOrNull { it.id == assigned }?.let { Component.translatable(it.nameKey).string }
-            centered(graphics, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22, timelineY + 22, ink)
+            val definition = ClientCache.defs.firstOrNull { it.id == assigned }
+            val name = definition?.let { Component.translatable(it.nameKey).string }
+            val entryColor = definition?.let { it.color or 0xFF000000.toInt() } ?: ink
+            centered(graphics, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22, timelineY + 22, entryColor)
         }
         centered(graphics, "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, muted)
         super.render(graphics, mouseX, mouseY, partialTick)
@@ -94,7 +96,8 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
             val hover = mouseX in bx until (bx + bw) && mouseY in by until (by + bh)
             graphics.fill(bx, by, bx + bw, by + bh, if (hover) 0xFF59755C.toInt() else 0xFF405D49.toInt())
             graphics.fill(bx, by, bx + bw, by + 2, border)
-            centered(graphics, button.message.string, bx + bw / 2, by + (bh - font.lineHeight) / 2, 0xFFF9EFD7.toInt())
+            graphics.drawString(font, button.message, bx + (bw - font.width(button.message)) / 2,
+                by + (bh - font.lineHeight) / 2, 0xFFF9EFD7.toInt(), false)
         }
         val attributeButtons = children().filterIsInstance<Button>().drop(3)
         ClientCache.defs.zip(attributeButtons).forEach { (def, button) ->
