@@ -6,38 +6,45 @@ import kotlin.test.assertTrue
 
 class StatsScreenLayoutTest {
     @Test
-    fun `all eight attributes fit in a two by four grid at default scale three dimensions`() {
-        val layout = StatsScreenLayoutPolicy.calculate(427, 240, 8)
-
-        assertEquals(layout.attributeX(0), layout.attributeX(2))
-        assertEquals(layout.attributeX(1), layout.attributeX(3))
-        assertTrue(layout.attributeX(0) < layout.attributeX(1))
-        assertEquals(4, (0 until 8).map(layout::attributeY).distinct().size)
-        assertTrue(layout.attributeY(7) + layout.attributeTileHeight <= layout.propertyHeaderTop)
-        assertTrue(layout.propertyViewportHeight >= 22, "at least one complete property row remains visible")
-        assertTrue(
-            StatsScreenLayoutPolicy.CONTROL_TOP + StatsScreenLayoutPolicy.CONTROL_SIZE <= StatsScreenLayoutPolicy.DETAIL_TOP,
-            "top-line controls must end before next-point detail text begins"
-        )
-        assertTrue(
-            StatsScreenLayoutPolicy.BADGE_Y + StatsScreenLayoutPolicy.BADGE_SIZE <= layout.attributeTileHeight,
-            "the full aspect badge must fit inside its row"
-        )
-        assertTrue(
-            StatsScreenLayoutPolicy.BADGE_X + StatsScreenLayoutPolicy.BADGE_SIZE +
-                StatsScreenLayoutPolicy.BADGE_TEXT_GAP < layout.attributeTileWidth - 62,
-            "attribute text must begin after the badge and before its controls"
-        )
-        assertTrue(layout.footerTop < layout.panelY + layout.panelHeight)
+    fun `all eight complete cards remain visible across GUI scales and smaller windows`() {
+        for ((width, height) in listOf(1920 to 1080, 960 to 540, 640 to 360, 480 to 270, 427 to 240, 320 to 180)) {
+            val l = StatsScreenLayoutPolicy.calculate(width, height, 8)
+            assertEquals(4, l.columns)
+            assertEquals(2, (0 until 8).map(l::cardY).distinct().size)
+            assertTrue(l.cardWidth >= 184)
+            assertTrue(l.cardHeight >= StatsScreenLayoutPolicy.MIN_CARD_HEIGHT)
+            for (i in 0 until 8) {
+                assertTrue(l.cardX(i) >= 0 && l.cardY(i) >= 0)
+                assertTrue((l.cardX(i) + l.cardWidth) * l.scale <= width)
+                assertTrue(l.cardY(i) + l.cardHeight < l.footerTop)
+                assertTrue((l.cardY(i) + l.cardHeight) * l.scale <= height)
+                // Five always-visible effects end before the allocation controls.
+                val spacing = minOf(18, (l.cardHeight - 110) / 5).coerceAtLeast(10)
+                assertTrue(77 + spacing * 4 + 9 <= l.cardHeight - 32)
+                val targetX = l.cardX(i) + l.cardWidth - 19.0
+                val targetY = l.cardY(i) + l.cardHeight - 17.0
+                assertEquals(targetX, l.logical(targetX * l.scale), 1e-5)
+                assertEquals(targetY, l.logical(targetY * l.scale), 1e-5)
+            }
+        }
     }
 
     @Test
-    fun `larger screens expand properties without spreading the attribute grid`() {
-        val compact = StatsScreenLayoutPolicy.calculate(427, 240, 8)
-        val large = StatsScreenLayoutPolicy.calculate(640, 360, 8)
+    fun `larger viewports use the whole screen instead of a fixed compact panel`() {
+        val normal = StatsScreenLayoutPolicy.calculate(960, 540, 8)
+        val large = StatsScreenLayoutPolicy.calculate(1920, 1080, 8)
+        assertTrue(large.cardWidth > normal.cardWidth)
+        assertTrue(large.cardHeight > normal.cardHeight)
+        assertEquals(1f, large.scale)
+        assertTrue(large.cardX(3) + large.cardWidth >= large.width - 19)
+    }
 
-        assertEquals(compact.attributeTileHeight, large.attributeTileHeight)
-        assertTrue(large.attributeTileWidth > compact.attributeTileWidth)
-        assertTrue(large.propertyViewportHeight > compact.propertyViewportHeight)
+    @Test
+    fun `empty and extended definition lists have valid geometry`() {
+        for (count in listOf(0, 1, 3, 9, 12)) {
+            val l = StatsScreenLayoutPolicy.calculate(640, 360, count)
+            assertTrue(l.cardWidth > 0 && l.cardHeight >= 166)
+            if (count > 0) assertTrue(l.cardY(count - 1) + l.cardHeight < l.footerTop)
+        }
     }
 }

@@ -1,225 +1,162 @@
 package com.bettercontent.betterrpgprogression.harness
 
-import com.bettercontent.betterrpgprogression.client.cache.ClientCache
-import com.bettercontent.betterrpgprogression.client.cache.ClientCurveDef
-import com.bettercontent.betterrpgprogression.client.cache.ClientEffectDef
-import com.bettercontent.betterrpgprogression.client.cache.ClientStatDef
-import com.bettercontent.betterrpgprogression.client.cache.ClientStatsSnapshot
+import com.bettercontent.betterrpgprogression.RpgStatsMod
+import com.bettercontent.betterrpgprogression.client.cache.*
 import com.bettercontent.betterrpgprogression.client.ui.StatsScreen
+import com.bettercontent.betterrpgprogression.common.salience.AspectIdentity
+import com.google.gson.JsonParser
 import net.minecraft.client.Minecraft
 import net.minecraft.client.Screenshot
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.resources.language.I18n
+import net.minecraft.network.chat.Component
 import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
+import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.common.Mod
-import com.bettercontent.betterrpgprogression.RpgStatsMod
+import java.security.MessageDigest
 
-/**
- * Development-only visual fixture. The dedicated runVisualHarness Gradle run includes this
- * source set alongside RPG Stats and captures the stats screen without a modpack or world.
- */
+/** Development-only: production rendering, authored definitions, no world, fake mouse or pack. */
 @Mod.EventBusSubscriber(modid = RpgStatsMod.MODID, value = [Dist.CLIENT], bus = Mod.EventBusSubscriber.Bus.FORGE)
 object RpgStatsVisualHarness {
-    private val heartCaptureTicks = setOf(1, 13, 25, 37)
-    private var opened = false
+    private data class Case(val name: String, val scale: Int = 3, val pending: Boolean = false,
+        val empty: Boolean = false, val exhausted: Boolean = false, val capped: Boolean = false,
+        val nativeOnly: Boolean = false, val width: Int = 1920, val height: Int = 1080)
+    private val cases = listOf(
+        Case("empty-full-gui3", empty = true),
+        Case("draft-full-gui3", pending = true),
+        Case("draft-full-gui2", scale = 2, pending = true),
+        Case("draft-full-gui4", scale = 4, pending = true),
+        Case("no-points-full-gui3", exhausted = true),
+        Case("capped-full-gui3", capped = true),
+        Case("empty-native-gui3", nativeOnly = true, empty = true),
+        Case("draft-1280-gui3", pending = true, width = 1280, height = 720)
+    )
     private var startupTicks = 0
-    private var screenTicks = 0
-    private var statsCaptures = 0
-    private var soundScreenTicks = 0
-    private var soundCaptured = false
-    private var heartScreenTicks = 0
-    private var heartCaptures = 0
-    private var ticksAfterCapture = 0
+    private var caseIndex = -1
+    private var ticks = 0
+    private var capturing = false
+    private var finished = false
 
     @SubscribeEvent
-    fun onClientTick(event: TickEvent.ClientTickEvent) {
+    fun tick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.END) return
-
-        val minecraft = Minecraft.getInstance()
-        if (!opened) {
-            if (minecraft.overlay == null && minecraft.screen != null) startupTicks++
-            if (startupTicks >= 20) {
-                seedFixture()
-                ClientCache.stats = ClientStatsSnapshot(unspent = 4, lifePeak = 27, allocations = emptyMap())
-                minecraft.setScreen(StatsScreen())
-                opened = true
-                println("RPG_STATS_VISUAL_HARNESS empty-compact-stats-ready")
-            }
+        val mc = Minecraft.getInstance()
+        if (finished) {
+            if (++ticks > 15) mc.stop()
             return
         }
-
-        if (statsCaptures < 3 && minecraft.screen is StatsScreen) {
-            screenTicks++
-            if (screenTicks >= 40) {
-                Screenshot.grab(minecraft.gameDirectory, minecraft.mainRenderTarget) { message ->
-                    val state = when (statsCaptures) {
-                        0 -> "empty gui-scale=3"
-                        1 -> "pending gui-scale=3"
-                        else -> "pending gui-scale=2"
-                    }
-                    println("RPG_STATS_VISUAL_HARNESS stats-screenshot $state $message")
-                }
-                statsCaptures++
-                screenTicks = 0
-                if (statsCaptures == 1) {
-                    seedStats()
-                    val screen = StatsScreen()
-                    minecraft.setScreen(screen)
-                    screen.children().filterIsInstance<Button>().lastOrNull { it.message.string == "+" }?.onPress()
-                    println("RPG_STATS_VISUAL_HARNESS pending-compact-stats-ready")
-                } else if (statsCaptures == 2) {
-                    minecraft.options.guiScale().set(2)
-                    minecraft.resizeDisplay()
-                    val screen = StatsScreen()
-                    minecraft.setScreen(screen)
-                    screen.children().filterIsInstance<Button>().lastOrNull { it.message.string == "+" }?.onPress()
-                    println("RPG_STATS_VISUAL_HARNESS expanded-stats-ready")
-                } else {
-                    minecraft.setScreen(IdentitySoundReviewScreen())
-                    println("RPG_STATS_VISUAL_HARNESS sound-review-ready")
-                }
-            }
+        if (caseIndex < 0) {
+            if (mc.overlay == null && mc.screen != null && ++startupTicks >= 20) open(mc, 0)
             return
         }
-
-        if (!soundCaptured && minecraft.screen is IdentitySoundReviewScreen) {
-            soundScreenTicks++
-            if (soundScreenTicks % 12 == 1) {
-                val index = soundScreenTicks / 12
-                com.bettercontent.betterrpgprogression.common.salience.AspectIdentity.entries.getOrNull(index)?.let {
-                    (minecraft.screen as IdentitySoundReviewScreen).play(it)
-                }
+        if (capturing) return
+        if (++ticks == 15 && cases[caseIndex].pending) {
+            // Exercise native callbacks, never synthesize pointer events. Also check auto-plan return.
+            val screen = mc.screen as StatsScreen
+            val before = buttons(screen).first { it.message.string == "Auto plan" }
+            before.onPress()
+            mc.screen!!.onClose()
+            check(mc.screen === screen) { "Auto plan did not return to the same allocation draft" }
+            check(buttons(screen).any { it.message.string == "Commit 3 points" && it.active }) {
+                "Returning from Auto plan lost the allocation draft"
             }
-            if (soundScreenTicks >= 100) {
-                Screenshot.grab(minecraft.gameDirectory, minecraft.mainRenderTarget) { message ->
-                    println("RPG_STATS_VISUAL_HARNESS sound-review-screenshot $message")
-                }
-                soundCaptured = true
-                minecraft.setScreen(StillBeatingHeartAnimationScreen())
-                println("RPG_STATS_VISUAL_HARNESS heart-screen-ready")
-            }
-            return
         }
-
-        if (minecraft.screen is StillBeatingHeartAnimationScreen && heartCaptures < heartCaptureTicks.size) {
-            heartScreenTicks++
-            if (heartScreenTicks in heartCaptureTicks) {
-                Screenshot.grab(minecraft.gameDirectory, minecraft.mainRenderTarget) { message ->
-                    println("RPG_STATS_VISUAL_HARNESS heart-screenshot tick=$heartScreenTicks $message")
+        if (ticks < 35) return
+        val case = cases[caseIndex]
+        check(mc.window.width == case.width && mc.window.height == case.height) { "Wrong framebuffer dimensions" }
+        check(mc.screen is StatsScreen)
+        check(buttons(mc.screen as StatsScreen).size == 20) { "Expected 16 allocation and 4 footer controls" }
+        capturing = true
+        val fileName = "allocation-${case.name}.png"
+        Screenshot.grab(mc.gameDirectory, fileName, mc.mainRenderTarget) { message ->
+            println("RPG_STATS_REVIEW captured=$fileName framebuffer=${case.width}x${case.height} $message")
+            mc.execute {
+                capturing = false
+                if (caseIndex + 1 < cases.size) open(mc, caseIndex + 1) else {
+                    finished = true
+                    ticks = 0
+                    println("RPG_STATS_REVIEW PASS ${cases.size} native captures; draft/reset/undo/cap/return callbacks verified; no pointer simulation")
                 }
-                heartCaptures++
             }
-            return
-        }
-
-        if (heartCaptures == heartCaptureTicks.size) {
-            ticksAfterCapture++
-            if (ticksAfterCapture >= 40) minecraft.stop()
         }
     }
 
-    private fun seedFixture() {
-        ClientCache.defs = listOf(
-            stat(
-                "arms", "✦", 0xFF4055,
-                effect("minecraft:generic.attack_damage", 0, 6.0),
-                effect("epicfight:impact", 0, 0.75, primary = false),
-                effect("minecraft:generic.attack_knockback", 0, 0.4, primary = false)
-            ),
-            stat(
-                "hands", "»", 0x00A985,
-                effect("minecraft:generic.attack_speed", 0, 0.6),
-                effect("tconstruct:player.use_item_speed", 1, 0.25, primary = false)
-            ),
-            stat("fingers", "⚒", 0xF0E2C5, effect("better_rpg_progression:mining_speed", 1, 0.75), effect("forge:block_reach", 0, 1.0, primary = false)),
-            stat("lungs", "➜", 0xE0B01F, effect("minecraft:generic.movement_speed", 0, 0.05), effect("forge:swim_speed", 1, 0.25, primary = false), effect("forge:step_height_addition", 0, 0.5, primary = false), effect("better_rpg_progression:air_capacity", 1, 1.0, primary = false)),
-            stat(
-                "blood", "∞", 0x52606A,
-                effect("better_rpg_progression:hunger_efficiency", 1, 1.0),
-                effect("better_rpg_progression:thirst_efficiency", 1, 1.0, primary = false),
-                effect("epicfight:staminar", 1, 0.3, primary = false)
-            ),
-            stat(
-                "skin", "◆", 0xAF6A2F,
-                effect("cold_sweat:heat_resistance", 0, 0.6, displayAsPercent = true),
-                effect("cold_sweat:cold_resistance", 0, 0.6, primary = false, displayAsPercent = true)
-            ),
-            stat(
-                "liver", "✚", 0x6CCAF0,
-                effect("better_rpg_progression:harmful_effect_duration_reduction", 0, 0.25, displayAsPercent = true),
-                effect("better_rpg_progression:beneficial_effect_duration", 0, 0.25, primary = false, displayAsPercent = true)
-            ),
-            stat(
-                "eyes", "⊕", 0x8E5BB7,
-                effect("better_rpg_progression:arrow_spread_reduction", 0, 0.35, displayAsPercent = true),
-                effect("better_rpg_progression:arrow_speed_bonus", 0, 0.08, primary = false, displayAsPercent = true),
-                effect("better_rpg_progression:recoil_reduction", 0, 0.35, primary = false, displayAsPercent = true),
-                effect("better_rpg_progression:dispersion_reduction", 0, 0.35, primary = false, displayAsPercent = true),
-                effect("goety:spell_range", 1, 0.25, primary = false)
-            )
-        )
-        seedStats()
-    }
-
-    private fun seedStats() {
+    private fun open(mc: Minecraft, index: Int) {
+        caseIndex = index
+        ticks = 0
+        val case = cases[index]
+        mc.window.setWindowed(case.width, case.height)
+        mc.options.guiScale().set(case.scale)
+        mc.resizeDisplay()
+        val definitions = loadDefinitions(case.nativeOnly)
+        ClientCache.defs = if (case.capped) definitions.map { if (it.id.endsWith(":arms")) it.copy(maxPoints = 4) else it } else definitions
         ClientCache.stats = ClientStatsSnapshot(
-            unspent = 4,
-            lifePeak = 27,
-            allocations = mapOf(
-                "better_rpg_progression:arms" to 4,
-                "better_rpg_progression:hands" to 2,
-                "better_rpg_progression:fingers" to 3,
-                "better_rpg_progression:lungs" to 1,
-                "better_rpg_progression:blood" to 2,
-                "better_rpg_progression:skin" to 2,
-                "better_rpg_progression:liver" to 2,
-                "better_rpg_progression:eyes" to 1
-            )
+            unspent = if (case.exhausted) 0 else 4, lifePeak = 27,
+            allocations = if (case.empty) emptyMap() else AspectIdentity.entries.associate {
+                "better_rpg_progression:${it.statId}" to if (it.statId == "arms") 4 else 2
+            }
         )
+        val screen = StatsScreen()
+        mc.setScreen(screen)
+        val plus = buttons(screen).filter { it.message.string.startsWith("Add a point") }
+        val minus = buttons(screen).filter { it.message.string.startsWith("Remove a draft") }
+        check(minus.none { it.active }) { "Committed points can be refunded" }
+        if (case.pending) {
+            listOf(0, 3, 7).forEach { plus[it].onPress() }
+            check(buttons(screen).any { it.message.string == "Commit 3 points" && it.active })
+            minus[7].onPress()
+            check(buttons(screen).any { it.message.string == "Commit 2 points" && it.active })
+            buttons(screen).first { it.message.string == "Reset draft" }.onPress()
+            check(buttons(screen).none { it.message.string.startsWith("Commit") && it.active })
+            listOf(0, 3, 7).forEach { plus[it].onPress() }
+        }
+        if (case.capped) check(!plus.first().active) { "Capped allocation can be incremented" }
+        if (case.exhausted) check(plus.none { it.active }) { "Allocation possible with no points" }
+        auditText(mc, ClientCache.defs)
+        println("RPG_STATS_REVIEW ready=${case.name} active-effects=${ClientCache.defs.sumOf { it.effects.size }} gui=${mc.window.guiScaledWidth}x${mc.window.guiScaledHeight}")
     }
 
-    private fun stat(id: String, icon: String, color: Int, vararg effects: ClientEffectDef): ClientStatDef =
-        ClientStatDef(
-            id = "better_rpg_progression:$id",
-            nameKey = "stat.better_rpg_progression.${visibleNames.getValue(id)}",
-            maxPoints = -1,
-            effects = effects.toList(),
-            icon = icon,
-            color = color
-        )
+    private fun buttons(screen: StatsScreen) = screen.children().filterIsInstance<Button>()
 
-    private val visibleNames = mapOf(
-        "arms" to "arms",
-        "hands" to "hands",
-        "fingers" to "fingers",
-        "lungs" to "lungs",
-        "blood" to "blood",
-        "skin" to "skin",
-        "liver" to "liver",
-        "eyes" to "eyes"
-    )
+    private fun loadDefinitions(nativeOnly: Boolean): List<ClientStatDef> = AspectIdentity.entries.map { aspect ->
+        val path = "/data/better_rpg_progression/stats/${aspect.statId}.json"
+        val bytes = requireNotNull(RpgStatsVisualHarness::class.java.getResourceAsStream(path)).use { it.readBytes() }
+        val hash = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+        println("RPG_STATS_REVIEW input=$path sha256=$hash mode=${if (nativeOnly) "loaded-mods" else "all-authored-integrations (presentation stress only)"}")
+        val obj = JsonParser.parseString(bytes.toString(Charsets.UTF_8)).asJsonObject
+        val effects = obj.getAsJsonArray("effects").map { it.asJsonObject }.filter {
+            !nativeOnly || !it.has("requires_mod") || ModList.get().isLoaded(it.get("requires_mod").asString)
+        }.map { effect ->
+            val curve = effect.getAsJsonObject("curve")
+            val operation = when (effect.get("operation").asString) { "multiply_base" -> 1; "multiply_total" -> 2; else -> 0 }
+            ClientEffectDef(effect.get("attribute").asString, operation,
+                ClientCurveDef(curve.get("type").asString, curve.get("cap").asDouble, curve.get("k").asDouble,
+                    curve.get("per_point")?.asDouble ?: 0.0, curve.get("min").asDouble, curve.get("max").asDouble),
+                effect.get("is_primary")?.asBoolean ?: true,
+                effect.get("display_as_percent")?.asBoolean ?: (operation != 0))
+        }
+        ClientStatDef("better_rpg_progression:${aspect.statId}", obj.get("name_key").asString,
+            obj.get("max_points")?.asInt ?: -1, effects, obj.get("icon").asString,
+            obj.get("color").asString.removePrefix("#").toInt(16))
+    }
 
-    private fun effect(
-        attributeId: String,
-        operation: Int,
-        cap: Double,
-        primary: Boolean = true,
-        displayAsPercent: Boolean = operation != 0
-    ) =
-        ClientEffectDef(
-            attributeId = attributeId,
-            operation = operation,
-            curve = ClientCurveDef(
-                type = "hyperbola",
-                cap = cap,
-                k = 20.0,
-                perPoint = 0.0,
-                min = 0.0,
-                max = cap
-            ),
-            isPrimary = primary,
-            displayAsPercent = displayAsPercent
-        )
-
+    /** Real font metrics, including the 5-effect worst case, before any screenshot is accepted. */
+    private fun auditText(mc: Minecraft, definitions: List<ClientStatDef>) {
+        val scale = minOf(1f, mc.window.guiScaledWidth / 800f, mc.window.guiScaledHeight / 500f)
+        val canvasWidth = (mc.window.guiScaledWidth / scale).toInt()
+        val cardWidth = (canvasWidth - 32 - 30) / 4
+        definitions.forEach { def ->
+            check(mc.font.width(Component.translatable(def.nameKey)) <= cardWidth - 43) { "Name does not fit: ${def.id}" }
+            val purpose = Component.translatable("${def.nameKey}.purpose")
+            check(mc.font.split(purpose, cardWidth - 20).size <= 2) { "Purpose exceeds two lines: ${def.id}" }
+            check(def.effects.size <= 5) { "Effect table needs more space: ${def.id}" }
+            def.effects.forEach { effect ->
+                val key = "effect.better_rpg_progression.${effect.attributeId.replace(':', '.')}"
+                check(I18n.exists(key)) { "Missing concise effect label: $key" }
+                check(mc.font.width(Component.translatable(key)) <= cardWidth - 106) { "Effect label overlaps values: $key" }
+            }
+        }
+    }
 }

@@ -59,7 +59,7 @@ minecraft {
             workingDirectory project.file('run-visual-harness')
             property 'forge.logging.console.level', 'info'
             property 'better_rpg_progression.visualHarness', 'true'
-            args '--width', '1280', '--height', '720'
+            args '--width', '1920', '--height', '1080'
             mods {
                 "${mod_id}" {
                     source sourceSets.main
