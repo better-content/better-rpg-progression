@@ -6,19 +6,6 @@
   "effects": [
     {
       "type": "attribute",
-      "attribute": "better_rpg_progression:outgoing_damage",
-      "operation": "multiply_base",
-      "curve": {
-        "type": "hyperbola",
-        "cap": 0.6,
-        "k": 20.0,
-        "min": 0.0,
-        "max": 0.6
-      },
-      "is_primary": true
-    },
-    {
-      "type": "attribute",
       "attribute": "epicfight:impact",
       "operation": "add",
       "curve": {
@@ -42,7 +29,7 @@
         "min": 0.0,
         "max": 0.4
       },
-      "is_primary": false
+      "is_primary": true
     }
   ]
 }

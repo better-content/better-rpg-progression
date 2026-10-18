@@ -25,6 +25,9 @@ object RpgStatsMod {
         ModBlockEntities.register(modBus)
         ModSounds.register(modBus)
         Network.init()
+        // Kotlin-for-Forge discovers subscriber objects; register this Java static subscriber explicitly.
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
+            com.bettercontent.betterrpgprogression.common.event.MilkPreservation::class.java)
         // Everything else is registered via @EventBusSubscriber objects.
     }
 }

@@ -34,7 +34,6 @@ class RpgStatsResourceTest {
 
     private val effects = mapOf(
         "arms" to mapOf(
-            "better_rpg_progression:outgoing_damage" to EffectContract(0.6, "multiply_base"),
             "epicfight:impact" to EffectContract(0.75, "add", "epicfight"),
             "minecraft:generic.attack_knockback" to EffectContract(0.4, "add")
         ),
@@ -43,27 +42,19 @@ class RpgStatsResourceTest {
             "tconstruct:player.use_item_speed" to EffectContract(0.25, "multiply_base", "tconstruct")
         ),
         "fingers" to mapOf(
-            "better_rpg_progression:mining_speed" to EffectContract(0.75, "multiply_base"),
             "forge:block_reach" to EffectContract(1.0, "add")
         ),
         "lungs" to mapOf(
-            "minecraft:generic.movement_speed" to EffectContract(0.05, "add"),
-            "forge:swim_speed" to EffectContract(0.25, "multiply_base"),
             "forge:step_height_addition" to EffectContract(0.5, "add"),
             "better_rpg_progression:air_capacity" to EffectContract(1.0, "multiply_base")
         ),
         "blood" to mapOf(
-            "better_rpg_progression:hunger_efficiency" to EffectContract(1.0, "multiply_base"),
-            "better_rpg_progression:thirst_efficiency" to EffectContract(1.0, "multiply_base"),
             "epicfight:staminar" to EffectContract(0.3, "multiply_base", "epicfight")
         ),
         "skin" to mapOf(
-            "cold_sweat:heat_resistance" to EffectContract(0.6, "add", "cold_sweat", true),
-            "cold_sweat:cold_resistance" to EffectContract(0.6, "add", "cold_sweat", true),
             "minecraft:generic.knockback_resistance" to EffectContract(0.15, "add")
         ),
         "liver" to mapOf(
-            "better_rpg_progression:harmful_effect_duration_reduction" to EffectContract(0.25, "add", displayAsPercent = true),
             "better_rpg_progression:beneficial_effect_duration" to EffectContract(0.25, "add", displayAsPercent = true)
         ),
         "eyes" to mapOf(
@@ -132,6 +123,24 @@ class RpgStatsResourceTest {
                 assertFalse(term in attribute, "$attribute violates permanent-Life projection policy")
             }
         }
+    }
+
+    @Test
+    fun `authored RPG projections do not duplicate continuous nutrition primaries`() {
+        val forbidden = setOf(
+            "better_rpg_progression:outgoing_damage", "minecraft:generic.attack_damage",
+            "better_rpg_progression:mining_speed", "minecraft:generic.movement_speed", "forge:swim_speed",
+            "better_rpg_progression:hunger_efficiency", "better_rpg_progression:thirst_efficiency",
+            "cold_sweat:heat_resistance", "cold_sweat:cold_resistance",
+            "better_rpg_progression:harmful_effect_duration_reduction"
+        )
+        statFiles().forEach { path ->
+            val rows = readJson(path).getAsJsonArray("effects").map { it.asJsonObject }
+            assertEquals(1, rows.count { it.get("is_primary")?.asBoolean == true }, "$path must have one primary")
+            rows.forEach { assertFalse(it.string("attribute") in forbidden, "$path duplicates nutrition") }
+        }
+        val language = readJson(Path.of("src/main/resources/assets/better_rpg_progression/lang/en_us.json"))
+        assertEquals("Preservation", language.string("stat.better_rpg_progression.liver"))
     }
 
     @Test

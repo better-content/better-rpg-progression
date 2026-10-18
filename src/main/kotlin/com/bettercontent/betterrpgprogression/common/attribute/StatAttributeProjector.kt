@@ -13,25 +13,19 @@ import net.minecraftforge.registries.ForgeRegistries
 object StatAttributeProjector {
 
     /**
-     * Remove ALL our known modifiers (based on loaded defs), then add back the ones implied by allocations.
-     * This avoids "stale modifier" bugs when a stat goes to 0 or is removed/reset.
+     * Remove every modifier owned by this projector, then rebuild from current definitions.
+     * Removed projections must not survive a data reload merely because their old row is gone.
      */
     fun reapply(player: ServerPlayer) {
         val stats = StatsCap.get(player) ?: return
         val defs = RegistryState.activeSnapshot()
 
-        // 1) Remove everything we own.
-        for (def in defs.values) {
-            val statIdStr = def.id.toString()
-            for (effect in def.effects) {
-                if (effect is AttributeEffect) {
-                    if (!EffectAvailability.isAvailable(effect)) continue
-                    val attr = ForgeRegistries.ATTRIBUTES.getValue(effect.attributeId) ?: continue
-                    val inst: AttributeInstance = player.getAttribute(attr) ?: continue
-                    val uuid = ModifierUuids.uuidFor(statIdStr, effect.attributeId.toString())
-                    inst.removeModifier(uuid)
-                }
-            }
+        // Do not derive cleanup from the new definitions: removed effects are absent there.
+        for (attribute in ForgeRegistries.ATTRIBUTES.values) {
+            val instance = player.getAttribute(attribute) ?: continue
+            instance.modifiers.toList()
+                .filter { it.name.startsWith("better_rpg_progression:") }
+                .forEach { instance.removeModifier(it.id) }
         }
 
         // 2) Add current projections.
