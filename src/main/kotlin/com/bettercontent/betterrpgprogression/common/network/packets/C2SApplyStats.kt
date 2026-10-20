@@ -1,6 +1,9 @@
 package com.bettercontent.betterrpgprogression.common.network.packets
 
 import com.bettercontent.betterrpgprogression.common.attribute.StatAttributeProjector
+import com.bettercontent.betterrpgprogression.diagnostics.PlaytestDiagnostics
+import com.bettercontent.betterrpgprogression.diagnostics.PlaytestLog
+import com.bettercontent.betterrpgprogression.diagnostics.ProgressionOutcomes
 import com.bettercontent.betterrpgprogression.api.event.LifeAllocationEvent
 import com.bettercontent.betterrpgprogression.common.points.LifeAllocationEvents
 import com.bettercontent.betterrpgprogression.common.data.StatsCap
@@ -57,6 +60,8 @@ data class C2SApplyStats(
                     maxPointsById = defs.mapKeys { it.key.toString() }.mapValues { it.value.maxPoints }
                 )
                 if (decision == null) {
+                    if (PlaytestDiagnostics.LOG.enabled("allocation")) PlaytestDiagnostics.LOG.event(
+                        "allocation", "allocation.manual", "server", ProgressionOutcomes.manual(false, 0), "allocation_policy", null)
                     Network.syncTo(sender)
                     return@enqueueWork
                 }
@@ -75,6 +80,9 @@ data class C2SApplyStats(
                     LifeAllocationEvents.post(sender, LifeAllocationEvent.State.SPENT, token)
                     stats.lifeAllocationEpisode = null
                 }
+                if (PlaytestDiagnostics.LOG.enabled("allocation")) PlaytestDiagnostics.LOG.event(
+                    "allocation", "allocation.manual", "server", ProgressionOutcomes.manual(true, deltas.size),
+                    "stats_updated_sync_submitted", { PlaytestLog.fields("changed_stats", deltas.size, "unspent", stats.unspentPoints) })
             }
             context.packetHandled = true
         }

@@ -5,6 +5,19 @@
 This repository owns its mod-specific behavior and authoring inputs. Read [local instructions](AGENTS.md)
 and the [shared documentation/policy index](../../better-content-modpack/docs/README.md).
 
+## Bounded playtest diagnostics
+
+Loader SLF4J `bc.playtest.better_rpg_progression.*` reports one INFO startup/providers/own
+source status (UNKNOWN when absent). DEBUG distinguishes manual allocation rejection versus
+actual state update/sync submission, pre-XP-removal death capture, canceled capture discard and
+actual entitlement enqueue versus duplicate/empty refusal. It never logs per delivery tick,
+full arbitrary-precision values, raw requested IDs, player names, inventories, NBT or personal
+episode tokens. No additional gameplay RNG, packet fields, entitlement clamps or persistence
+changes are introduced. One mod-wide 120/minute burst20 budget, 256 aggregate keys,
+2048-character record bound and 30-second summaries limit output; disconnect/server stop clears
+keys without bucket refill. Standalone remains INFO; the pack selects scoped DEBUG. Enqueue is
+not item delivery, and sync submission is not native StatsScreen presentation acceptance.
+
 
 Pack-owned RPG stats and diminishing-returns system for Forge `1.20.1`.
 

@@ -18,6 +18,7 @@ object RpgStatsMod {
 
     init {
         val modBus = KotlinModLoadingContext.get().getKEventBus()
+        com.bettercontent.betterrpgprogression.diagnostics.PlaytestDiagnostics.register(modBus)
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, HeartFragmentConfig.SPEC)
         ModAttributes.register(modBus)
         ModItems.register(modBus)

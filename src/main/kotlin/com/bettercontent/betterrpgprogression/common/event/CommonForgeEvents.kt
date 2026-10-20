@@ -1,6 +1,8 @@
 package com.bettercontent.betterrpgprogression.common.event
 
 import com.bettercontent.betterrpgprogression.RpgStatsMod
+import com.bettercontent.betterrpgprogression.diagnostics.PlaytestDiagnostics
+import com.bettercontent.betterrpgprogression.diagnostics.ProgressionOutcomes
 import com.bettercontent.betterrpgprogression.common.attribute.MiningSpeedScaling
 import com.bettercontent.betterrpgprogression.common.attribute.OutgoingDamageScaling
 import com.bettercontent.betterrpgprogression.common.attribute.ModAttributes
@@ -153,6 +155,8 @@ object CommonForgeEvents {
         // level before that happens, but wait until LOWEST to confirm the death survived
         // any cancellation before creating the heart.
         HeartFragmentEntitlements.captureFinalDeath(player.persistentData, player.experienceLevel)
+        if (PlaytestDiagnostics.LOG.enabled("entitlement")) PlaytestDiagnostics.LOG.event(
+            "entitlement", "heart.death", "server", "captured", "before_native_xp_removal", null)
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -167,13 +171,18 @@ object CommonForgeEvents {
         val player = event.entity as? ServerPlayer ?: return
         if (event.isCanceled) {
             HeartFragmentEntitlements.discardCapturedDeath(player.persistentData)
+            if (PlaytestDiagnostics.LOG.enabled("entitlement")) PlaytestDiagnostics.LOG.event(
+                "entitlement", "heart.death", "server", "canceled", "capture_clear_returned", null)
             return
         }
         if (player.level().isClientSide || player.isSpectator) return
         if (!StillBeatingHeartAltarHandler.isBloodMagicLoaded()) return
 
         HeartFragmentEntitlements.finalizeCapturedDeath(player.persistentData)?.let { entitlement ->
-            HeartFragmentEntitlements.enqueue(player.persistentData, entitlement)
+            val enqueued = HeartFragmentEntitlements.enqueue(player.persistentData, entitlement)
+            if (PlaytestDiagnostics.LOG.enabled("entitlement")) PlaytestDiagnostics.LOG.event(
+                "entitlement", "heart.entitlement", "server", ProgressionOutcomes.entitlement(enqueued),
+                if (enqueued) "final_death_confirmed" else "duplicate_or_empty", null)
         }
     }
 
