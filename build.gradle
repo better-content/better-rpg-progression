@@ -247,6 +247,8 @@ tasks.named('assemble').configure {
     dependsOn tasks.named('stageRuntimeJar')
 }
 
+apply from: 'gradle/native-gametest-fixture.gradle'
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
