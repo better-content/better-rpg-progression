@@ -1,10 +1,5 @@
 # Better RPG Progression
 
-## Scope and authority
-
-This repository owns its mod-specific behavior and authoring inputs. Read [local instructions](AGENTS.md)
-and the [shared documentation/policy index](../../better-content-modpack/docs/README.md).
-
 ## Cold source native fixture
 
 `verifyFull` binds a new `build/gametest/<UUID>` directly to Forge's actual RunConfig, setup,
