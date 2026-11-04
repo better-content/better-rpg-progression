@@ -120,8 +120,8 @@ def visualHarnessNotices = tasks.register('stageVisualHarnessNotices', Jar) {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     compileOnly files(System.getenv('BC_CUSTOM_MOD_JAR_DIR')
-        ? "${System.getenv('BC_CUSTOM_MOD_JAR_DIR')}/better-gameplay-notices-1.0.0.jar"
-        : '../better-gameplay-notices/build/libs/better-gameplay-notices-1.0.0.jar')
+        ? "${System.getenv('BC_CUSTOM_MOD_JAR_DIR')}/better-gameplay-notices-1.0.1.jar"
+        : '../better-gameplay-notices/build/libs/better-gameplay-notices-1.0.1.jar')
     // The isolated client uses named development classes; the deployable JAR is reobfuscated.
     visualHarnessRuntimeOnly files(visualHarnessNotices.flatMap { it.archiveFile })
     annotationProcessor "org.spongepowered:mixin:0.8.5:processor"

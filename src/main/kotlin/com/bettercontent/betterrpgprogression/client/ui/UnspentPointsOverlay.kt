@@ -3,41 +3,36 @@ package com.bettercontent.betterrpgprogression.client.ui
 import com.bettercontent.betterrpgprogression.RpgStatsMod
 import com.bettercontent.betterrpgprogression.client.cache.ClientCache
 import com.bettercontent.betterrpgprogression.client.input.KeybindRegister
+import com.bettercontent.gameplaynotices.GameplayNotice
+import com.bettercontent.gameplaynotices.NoticeReminder
+import com.bettercontent.gameplaynotices.NoticeTheme
 import net.minecraft.client.Minecraft
 import net.minecraft.network.chat.Component
 import net.minecraftforge.api.distmarker.Dist
-import net.minecraftforge.client.event.RenderGuiOverlayEvent
+import net.minecraftforge.event.TickEvent
 import net.minecraftforge.eventbus.api.SubscribeEvent
 import net.minecraftforge.fml.common.Mod
 
 @Mod.EventBusSubscriber(modid = RpgStatsMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = [Dist.CLIENT])
 object UnspentPointsOverlay {
+    private const val NOTICE_KEY = "guidance:life:unspent"
+    private val reminder = NoticeReminder()
 
     @SubscribeEvent
-    fun onRenderOverlay(event: RenderGuiOverlayEvent.Post) {
+    fun onClientTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.END) return
         val mc = Minecraft.getInstance()
-        if (mc.player == null || mc.isPaused) return
-
-        val unspent = ClientCache.stats.unspent
-        if (unspent <= 0) return
-
-        val guiGraphics = event.guiGraphics
-        val font = mc.font
-
-        val text1 = Component.translatable("overlay.better_rpg_progression.unspent_points", unspent.toString())
-        val text2 = Component.translatable("overlay.better_rpg_progression.press_key", KeybindRegister.mapping().translatedKeyMessage)
-        val boxWidth = maxOf(font.width(text1), font.width(text2))
-
-        val padding = 10
-        val x = event.window.guiScaledWidth - boxWidth - padding
-        val y = padding
-
-        val bgColor = 0x80000000.toInt()
-        val textColor = 0xFFFF55
-
-        guiGraphics.fill(x - 3, y - 3, x + boxWidth + 3, y + font.lineHeight * 2 + 3, bgColor)
-
-        guiGraphics.drawString(font, text1, x, y, textColor)
-        guiGraphics.drawString(font, text2, x, y + font.lineHeight, textColor)
+        val player = mc.player
+        if (player == null || mc.level == null || ClientCache.stats.unspent <= 0) {
+            reminder.clear()
+            return
+        }
+        val notice = GameplayNotice(NOTICE_KEY, NoticeTheme.LIFE,
+            Component.translatable("overlay.better_rpg_progression.unspent_points", ClientCache.stats.unspent),
+            Component.translatable("overlay.better_rpg_progression.press_key", KeybindRegister.mapping().translatedKeyMessage))
+        // Spectator onboarding guidance has priority; do not replace its one transient slot.
+        reminder.tick(NOTICE_KEY, notice, { mc.player != null && mc.level != null &&
+            ClientCache.stats.unspent > 0 && mc.player?.isSpectator != true },
+            mc.screen == null && !mc.options.hideGui && !player.isSpectator)
     }
 }
