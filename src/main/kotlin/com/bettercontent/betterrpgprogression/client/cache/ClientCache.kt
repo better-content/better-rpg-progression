@@ -23,7 +23,8 @@ data class ClientEffectDef(
     val operation: Int,
     val curve: ClientCurveDef,
     val isPrimary: Boolean = true,
-    val displayAsPercent: Boolean = operation != 0
+    val displayAsPercent: Boolean = operation != 0,
+    val available: Boolean = true
 )
 
 data class ClientStatDef(

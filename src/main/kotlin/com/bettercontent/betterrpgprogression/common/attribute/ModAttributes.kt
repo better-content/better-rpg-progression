@@ -60,6 +60,26 @@ object ModAttributes {
         RangedAttribute("attribute.name.better_rpg_progression.beneficial_effect_duration", 0.0, 0.0, 0.25).setSyncable(true)
     }
 
+    /** Conditional consumers read these values only for the matching climate or Epic Fight action. */
+    val HEAT_DRIFT_REDUCTION: RegistryObject<Attribute> = ATTRIBUTES.register("heat_drift_reduction") {
+        RangedAttribute("attribute.name.better_rpg_progression.heat_drift_reduction", 0.0, 0.0, 0.99).setSyncable(true)
+    }
+    val COLD_DRIFT_REDUCTION: RegistryObject<Attribute> = ATTRIBUTES.register("cold_drift_reduction") {
+        RangedAttribute("attribute.name.better_rpg_progression.cold_drift_reduction", 0.0, 0.0, 0.99).setSyncable(true)
+    }
+    val FREEZING_BOUNDARY_OFFSET: RegistryObject<Attribute> = ATTRIBUTES.register("freezing_boundary_offset") {
+        RangedAttribute("attribute.name.better_rpg_progression.freezing_boundary_offset", 0.0, -0.5, 0.0).setSyncable(true)
+    }
+    val BURNING_BOUNDARY_OFFSET: RegistryObject<Attribute> = ATTRIBUTES.register("burning_boundary_offset") {
+        RangedAttribute("attribute.name.better_rpg_progression.burning_boundary_offset", 0.0, 0.0, 0.5).setSyncable(true)
+    }
+    val AIR_ATTACK_STAMINA_REDUCTION: RegistryObject<Attribute> = ATTRIBUTES.register("air_attack_stamina_reduction") {
+        RangedAttribute("attribute.name.better_rpg_progression.air_attack_stamina_reduction", 0.0, 0.0, 0.99).setSyncable(true)
+    }
+    val AIR_SLASH_DAMAGE_BONUS: RegistryObject<Attribute> = ATTRIBUTES.register("air_slash_damage_bonus") {
+        RangedAttribute("attribute.name.better_rpg_progression.air_slash_damage_bonus", 0.0, 0.0, 0.30).setSyncable(true)
+    }
+
     fun register(bus: IEventBus) {
         ATTRIBUTES.register(bus)
     }
@@ -80,5 +100,11 @@ object PlayerAttributeRegistration {
         event.add(EntityType.PLAYER, ModAttributes.OUTGOING_DAMAGE.get())
         event.add(EntityType.PLAYER, ModAttributes.HARMFUL_EFFECT_DURATION_REDUCTION.get())
         event.add(EntityType.PLAYER, ModAttributes.BENEFICIAL_EFFECT_DURATION.get())
+        event.add(EntityType.PLAYER, ModAttributes.HEAT_DRIFT_REDUCTION.get())
+        event.add(EntityType.PLAYER, ModAttributes.COLD_DRIFT_REDUCTION.get())
+        event.add(EntityType.PLAYER, ModAttributes.FREEZING_BOUNDARY_OFFSET.get())
+        event.add(EntityType.PLAYER, ModAttributes.BURNING_BOUNDARY_OFFSET.get())
+        event.add(EntityType.PLAYER, ModAttributes.AIR_ATTACK_STAMINA_REDUCTION.get())
+        event.add(EntityType.PLAYER, ModAttributes.AIR_SLASH_DAMAGE_BONUS.get())
     }
 }

@@ -132,6 +132,9 @@ dependencies {
     compileOnly fg.deobf('curse.maven:blood-magic-224791:7956981')
     runtimeOnly fg.deobf('curse.maven:blood-magic-224791:7956981')
     runtimeOnly fg.deobf('curse.maven:patchouli-306770:7731017')
+    // Pinned optional APIs used only when their mods are present in the pack.
+    compileOnly fg.deobf('curse.maven:epic-fight-mod-405076:8049910')
+    compileOnly fg.deobf('curse.maven:cold-sweat-506194:7893262')
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit5:2.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
     testImplementation 'com.google.code.gson:gson:2.10.1'

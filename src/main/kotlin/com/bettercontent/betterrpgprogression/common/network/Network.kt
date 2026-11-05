@@ -14,7 +14,7 @@ import net.minecraftforge.network.PacketDistributor
 import net.minecraftforge.network.simple.SimpleChannel
 
 object Network {
-    private const val PROTOCOL = "3"
+    private const val PROTOCOL = "4"
 
     val CHANNEL: SimpleChannel = NetworkRegistry.newSimpleChannel(
         ResourceLocation(RpgStatsMod.MODID, "main"),

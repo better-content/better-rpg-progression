@@ -1,0 +1,11 @@
+{
+  "name_key": "stat.better_rpg_progression.aerialist",
+  "order": 80,
+  "icon": "»",
+  "color": "#00A985",
+  "effects": [
+    {"type":"attribute","attribute":"tconstruct:generic.jump_boost","operation":"add","curve":{"type":"hyperbola","cap":0.09,"k":10.0},"is_primary":false,"requires_mod":"tconstruct"},
+    {"type":"attribute","attribute":"better_rpg_progression:air_attack_stamina_reduction","operation":"add","curve":{"type":"hyperbola","cap":0.12,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"epicfight"},
+    {"type":"attribute","attribute":"better_rpg_progression:air_slash_damage_bonus","operation":"add","curve":{"type":"linear","per_point":0.015,"min":0.0,"max":0.30},"is_primary":true,"requires_mod":"epicfight"}
+  ]
+}

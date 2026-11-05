@@ -24,7 +24,7 @@ class IdentityAssetContractTest {
 
     @Test
     fun `badge font and motifs cover the exact identity contract`() {
-        assertEquals(listOf("arms", "hands", "fingers", "lungs", "blood", "skin", "liver", "eyes"),
+        assertEquals(listOf("vanguard", "sharpshooter", "artisan", "trailblazer", "survivalist", "spellcaster", "skirmisher", "aerialist"),
             AspectIdentity.entries.map { it.statId })
         val badge = resource("/assets/better_rpg_progression/textures/gui/stat_badges.png")
         assertEquals("44bca8862f44432b70ea5066fa59f2973ac42fb9f3089bfb3ce0557a2b19527b",

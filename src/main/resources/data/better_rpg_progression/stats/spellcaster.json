@@ -1,0 +1,13 @@
+{
+  "name_key": "stat.better_rpg_progression.spellcaster",
+  "order": 60,
+  "icon": "✚",
+  "color": "#6CCAF0",
+  "effects": [
+    {"type":"attribute","attribute":"ars_nouveau:ars_nouveau.perk.max_mana","operation":"add","curve":{"type":"hyperbola","cap":60.0,"k":10.0},"is_primary":false,"requires_mod":"ars_nouveau"},
+    {"type":"attribute","attribute":"ars_nouveau:ars_nouveau.perk.mana_regen","operation":"add","curve":{"type":"hyperbola","cap":1.2,"k":10.0},"is_primary":false,"requires_mod":"ars_nouveau"},
+    {"type":"attribute","attribute":"goety:soul_discount","operation":"add","curve":{"type":"hyperbola","cap":0.06,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"goety"},
+    {"type":"attribute","attribute":"goety:casting_speed","operation":"add","curve":{"type":"hyperbola","cap":0.08,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"goety"},
+    {"type":"attribute","attribute":"goety:spell_range","operation":"add","curve":{"type":"linear","per_point":0.05,"min":0.0,"max":1.0},"is_primary":true,"requires_mod":"goety"}
+  ]
+}

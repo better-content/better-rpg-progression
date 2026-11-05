@@ -31,7 +31,7 @@ data class S2CStatDefsSync(
         fun fromDefs(defs: List<StatDefinition>): S2CStatDefsSync {
             val list = defs.map { d ->
                 val effs = d.effects.mapNotNull { e ->
-                    if (e is AttributeEffect && EffectAvailability.isAvailable(e)) {
+                    if (e is AttributeEffect) {
                         ClientEffectDef(
                             attributeId = e.attributeId.toString(),
                             operation = e.operation.ordinal,
@@ -44,7 +44,8 @@ data class S2CStatDefsSync(
                                 max = e.curve.max
                             ),
                             isPrimary = e.isPrimary,
-                            displayAsPercent = e.displayAsPercent
+                            displayAsPercent = e.displayAsPercent,
+                            available = EffectAvailability.isAvailable(e)
                         )
                     } else null
                 }
@@ -74,6 +75,7 @@ data class S2CStatDefsSync(
                     buf.writeVarInt(e.operation)
                     buf.writeBoolean(e.isPrimary)
                     buf.writeBoolean(e.displayAsPercent)
+                    buf.writeBoolean(e.available)
                     buf.writeUtf(e.curve.type)
                     buf.writeDouble(e.curve.cap)
                     buf.writeDouble(e.curve.k)
@@ -100,6 +102,7 @@ data class S2CStatDefsSync(
                     val op = buf.readVarInt()
                     val isPrimary = buf.readBoolean()
                     val displayAsPercent = buf.readBoolean()
+                    val available = buf.readBoolean()
                     val t = buf.readUtf(32767)
                     val cap = buf.readDouble()
                     val k = buf.readDouble()
@@ -111,7 +114,8 @@ data class S2CStatDefsSync(
                         op,
                         ClientCurveDef(t, cap, k, per, min, max),
                         isPrimary,
-                        displayAsPercent
+                        displayAsPercent,
+                        available
                     )
                 }
                 list += ClientStatDef(id, nameKey, maxPoints, effs, icon, color)

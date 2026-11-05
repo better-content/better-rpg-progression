@@ -18,9 +18,9 @@ class StatsScreenLayoutTest {
                 assertTrue((l.cardX(i) + l.cardWidth) * l.scale <= width)
                 assertTrue(l.cardY(i) + l.cardHeight < l.footerTop)
                 assertTrue((l.cardY(i) + l.cardHeight) * l.scale <= height)
-                // Five always-visible effects end before the allocation controls.
-                val spacing = minOf(18, (l.cardHeight - 110) / 5).coerceAtLeast(10)
-                assertTrue(77 + spacing * 4 + 9 <= l.cardHeight - 32)
+                // Two landmark previews and the native detail button fit above draft controls.
+                assertTrue(68 + 16 + 9 < l.cardHeight - 46)
+                assertTrue(l.cardHeight - 45 >= 100)
                 val targetX = l.cardX(i) + l.cardWidth - 19.0
                 val targetY = l.cardY(i) + l.cardHeight - 17.0
                 assertEquals(targetX, l.logical(targetX * l.scale), 1e-5)

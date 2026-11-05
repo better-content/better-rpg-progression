@@ -6,6 +6,7 @@ import com.bettercontent.betterrpgprogression.common.config.json.CurveDef
 import com.bettercontent.betterrpgprogression.common.curve.Curves
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.floor
 
 internal data class StatsEffectReading(val bonus: Double, val next: Double, val percent: Boolean)
 
@@ -32,10 +33,61 @@ internal object StatsEffectPresentation {
         return StatsEffectReading(current * factor, next * factor, movement || resistance || effect.displayAsPercent)
     }
 
+    /** Goety converts its range attribute to an integer before using it. The raw curve is
+     * shown separately so sub-block progress is visible without promising extra cast range. */
+    fun effectiveSpellRange(effect: ClientEffectDef, points: Int, committed: Int, liveAttribute: Double): StatsEffectReading {
+        val raw = read(effect, points)
+        val committedBonus = read(effect, committed).bonus
+        val baseline = liveAttribute - committedBonus
+        val baseRange = floor(baseline + 1e-9)
+        val currentRange = floor(baseline + raw.bonus + 1e-9)
+        val nextRange = floor(baseline + raw.bonus + raw.next + 1e-9)
+        return StatsEffectReading(currentRange - baseRange, nextRange - currentRange, false)
+    }
+
+    /** The first future point at which Goety's integer range actually changes. */
+    fun nextSpellRangePoint(effect: ClientEffectDef, points: Int, committed: Int,
+                            liveAttribute: Double, cap: Int = 20): Int? {
+        val current = effectiveSpellRange(effect, points, committed, liveAttribute).bonus
+        return ((points + 1)..cap).firstOrNull {
+            effectiveSpellRange(effect, it, committed, liveAttribute).bonus > current
+        }
+    }
+
+    /** Show actual equipment-adjusted attribute values without suggesting they include draft points. */
+    fun formatEquipped(value: Double?): String? {
+        if (value == null || !value.isFinite()) return null
+        return String.format(Locale.ROOT, "%.3f", value).trimEnd('0').trimEnd('.').let {
+            if (it == "-0") "0" else it
+        }
+    }
+
+    /** Related integrations appear together, including unavailable rows. */
+    fun group(attributeId: String): String = when {
+        attributeId in setOf("better_rpg_progression:air_attack_stamina_reduction",
+            "better_rpg_progression:air_slash_damage_bonus") -> "epicfight"
+        attributeId in setOf("better_rpg_progression:heat_drift_reduction",
+            "better_rpg_progression:cold_drift_reduction",
+            "better_rpg_progression:freezing_boundary_offset",
+            "better_rpg_progression:burning_boundary_offset") -> "cold_sweat"
+        attributeId.startsWith("epicfight:") -> "epicfight"
+        attributeId.startsWith("tconstruct:") -> "tconstruct"
+        attributeId.startsWith("ars_nouveau:") -> "ars_nouveau"
+        attributeId.startsWith("goety:") -> "goety"
+        attributeId.startsWith("parcool:") -> "parcool"
+        attributeId.startsWith("cold_sweat:") -> "cold_sweat"
+        else -> "life"
+    }
+
     fun format(value: Double, percent: Boolean): String {
         if (abs(value) < 1e-9) return "—"
         val number = value * if (percent) 100.0 else 1.0
-        val decimals = if (abs(number) < 0.01) 4 else 2
+        // Small next-point increments must not round to zero while the curve is still increasing.
+        val decimals = when {
+            abs(number) >= 0.01 -> 2
+            abs(number) >= 0.0001 -> 4
+            else -> 8
+        }
         val text = String.format(Locale.ROOT, "%.${decimals}f", number).trimEnd('0').trimEnd('.')
         return "${if (number > 0) "+" else ""}$text${if (percent) "%" else ""}"
     }

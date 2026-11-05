@@ -1,0 +1,12 @@
+{
+  "name_key": "stat.better_rpg_progression.skirmisher",
+  "order": 70,
+  "icon": "∞",
+  "color": "#52606A",
+  "effects": [
+    {"type":"attribute","attribute":"parcool:max_stamina","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.12,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"parcool"},
+    {"type":"attribute","attribute":"parcool:stamina_recovery","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.10,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"parcool"},
+    {"type":"attribute","attribute":"epicfight:staminar","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.12,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"epicfight"},
+    {"type":"attribute","attribute":"epicfight:stamina_regen","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.10,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"epicfight"}
+  ]
+}

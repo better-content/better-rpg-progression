@@ -1,0 +1,11 @@
+{
+  "name_key": "stat.better_rpg_progression.trailblazer",
+  "order": 40,
+  "icon": "➜",
+  "color": "#E0B01F",
+  "effects": [
+    {"type":"attribute","attribute":"tconstruct:generic.safe_fall_distance","operation":"add","curve":{"type":"hyperbola","cap":3.0,"k":10.0},"is_primary":false,"requires_mod":"tconstruct"},
+    {"type":"attribute","attribute":"forge:swim_speed","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.15,"k":10.0},"is_primary":false,"display_as_percent":true},
+    {"type":"attribute","attribute":"forge:step_height_addition","operation":"add","curve":{"type":"linear","per_point":0.02,"min":0.0,"max":0.4},"is_primary":true}
+  ]
+}

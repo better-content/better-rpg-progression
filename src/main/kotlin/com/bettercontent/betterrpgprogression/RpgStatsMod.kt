@@ -4,6 +4,7 @@ import com.bettercontent.betterrpgprogression.common.item.ModItems
 import com.bettercontent.betterrpgprogression.common.block.ModBlocks
 import com.bettercontent.betterrpgprogression.common.block.entity.ModBlockEntities
 import com.bettercontent.betterrpgprogression.common.config.HeartFragmentConfig
+import net.minecraftforge.fml.ModList
 import net.minecraftforge.fml.ModLoadingContext
 import net.minecraftforge.fml.config.ModConfig
 import com.bettercontent.betterrpgprogression.common.attribute.ModAttributes
@@ -29,6 +30,15 @@ object RpgStatsMod {
         // Kotlin-for-Forge discovers subscriber objects; register this Java static subscriber explicitly.
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
             com.bettercontent.betterrpgprogression.common.event.MilkPreservation::class.java)
+        // Optional compat classes are loaded only if their pinned mod is present.
+        if (ModList.get().isLoaded("cold_sweat")) {
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
+                com.bettercontent.betterrpgprogression.common.attribute.ColdSweatLifeCompat)
+        }
+        if (ModList.get().isLoaded("epicfight")) {
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
+                com.bettercontent.betterrpgprogression.common.attribute.EpicFightLifeCompat)
+        }
         // Everything else is registered via @EventBusSubscriber objects.
     }
 }

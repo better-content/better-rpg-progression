@@ -48,6 +48,51 @@ class StatsEffectPresentationTest {
     }
 
     @Test
+    fun `small nonzero next point changes remain visible`() {
+        assertEquals("+0.000025%", StatsEffectPresentation.format(.00000025, true))
+        assertEquals("+0.00000025", StatsEffectPresentation.format(.00000025, false))
+        assertEquals("—", StatsEffectPresentation.format(0.0, true))
+    }
+
+    @Test
+    fun `Goety spell range reflects integer cast distance and preserves raw progress`() {
+        val range = ClientEffectDef("goety:spell_range", 0,
+            ClientCurveDef("linear", 0.0, 0.0, .05, 0.0, 1.0), displayAsPercent = false)
+        val early = StatsEffectPresentation.effectiveSpellRange(range, 1, 0, 0.0)
+        assertEquals(0.0, early.bonus)
+        assertEquals(0.0, early.next)
+        val threshold = StatsEffectPresentation.effectiveSpellRange(range, 19, 0, 0.0)
+        assertEquals(1.0, threshold.next)
+        val committed = StatsEffectPresentation.effectiveSpellRange(range, 20, 20, 1.0)
+        assertEquals(1.0, committed.bonus)
+        assertEquals(0.0, committed.next)
+        // A fractional equipment bonus can make a raw +.05 point cross the integer boundary earlier.
+        assertEquals(1.0, StatsEffectPresentation.effectiveSpellRange(range, 1, 0, .95).bonus)
+        assertEquals(20, StatsEffectPresentation.nextSpellRangePoint(range, 0, 0, 0.0))
+        assertEquals(1, StatsEffectPresentation.nextSpellRangePoint(range, 0, 0, .95))
+        assertNull(StatsEffectPresentation.nextSpellRangePoint(range, 20, 20, 1.0))
+        assertEquals("+1", StatsEffectPresentation.format(
+            StatsEffectPresentation.effectiveSpellRange(range, 20, 0, 0.0).bonus, false))
+    }
+
+    @Test
+    fun `equipped totals never imply a draft projection or invent an absent attribute`() {
+        assertEquals("17.375", StatsEffectPresentation.formatEquipped(17.375))
+        assertEquals("0", StatsEffectPresentation.formatEquipped(-0.0))
+        assertNull(StatsEffectPresentation.formatEquipped(null))
+        assertNull(StatsEffectPresentation.formatEquipped(Double.NaN))
+    }
+
+    @Test
+    fun `paired optional integrations have stable presentation groups`() {
+        assertEquals("goety", StatsEffectPresentation.group("goety:spell_range"))
+        assertEquals("goety", StatsEffectPresentation.group("goety:casting_speed"))
+        assertEquals("parcool", StatsEffectPresentation.group("parcool:stamina_recovery"))
+        assertEquals("cold_sweat", StatsEffectPresentation.group("better_rpg_progression:heat_drift_reduction"))
+        assertEquals("epicfight", StatsEffectPresentation.group("better_rpg_progression:air_slash_damage_bonus"))
+    }
+
+    @Test
     fun `display is locale independent and does not hide units in a tooltip`() {
         val old = Locale.getDefault()
         try {
