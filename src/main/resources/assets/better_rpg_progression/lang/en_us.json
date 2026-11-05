@@ -10,7 +10,7 @@
   "screen.better_rpg_progression.detail_hint": "Colored line = signature. At 20 = point-20 target; equipment can change equipped totals.",
   "screen.better_rpg_progression.open_details": "View all effects ›",
   "screen.better_rpg_progression.open_build": "View all %s effects ›",
-  "screen.better_rpg_progression.detail_points": "Invested: %s  ·  Draft: +%s",
+  "screen.better_rpg_progression.detail_points": "Total: %s points (includes +%s draft)",
   "screen.better_rpg_progression.decrease_selected": "Remove a draft point from selected build",
   "screen.better_rpg_progression.increase_selected": "Add a point to selected build",
   "screen.better_rpg_progression.unavailable": "Unavailable (mod not installed)",
