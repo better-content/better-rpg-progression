@@ -46,8 +46,13 @@ internal object StatsScreenLayoutPolicy {
 }
 
 /** Draft points never refund committed allocations and never mint additional points. */
-internal class StatsAllocationDraft(snapshot: com.bettercontent.betterrpgprogression.client.cache.ClientStatsSnapshot) {
-    private val original = snapshot.allocations.toMap()
+internal class StatsAllocationDraft(
+    snapshot: com.bettercontent.betterrpgprogression.client.cache.ClientStatsSnapshot,
+    activeIds: Set<String> = snapshot.allocations.keys
+) {
+    // Inert pre-consolidation investments remain committed on the server and consume no
+    // new budget; never resend their stale IDs as part of a fresh five-choice request.
+    private val original = snapshot.allocations.filterKeys { it in activeIds }
     private val initialUnspent = snapshot.unspent
     val allocations = original.toMutableMap()
     var unspent = initialUnspent

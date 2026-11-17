@@ -8,6 +8,7 @@ import com.bettercontent.betterrpgprogression.common.config.json.StatDefinition
 import com.bettercontent.betterrpgprogression.common.config.json.StatEffect
 import com.bettercontent.betterrpgprogression.common.network.Network
 import com.bettercontent.betterrpgprogression.common.network.packets.S2CStatDefsSync
+import com.bettercontent.betterrpgprogression.common.salience.AspectIdentity
 import com.google.gson.Gson
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -30,6 +31,11 @@ class StatReloadListener : SimpleJsonResourceReloadListener(GSON, "stats") {
         val parsed = mutableMapOf<ResourceLocation, StatDefinition>()
 
         for ((id, elem) in objects) {
+            // Old bundled/datapack definitions cannot resurrect a sixth Life choice.
+            if (AspectIdentity.fromStatId(id.toString()) == null) {
+                LOGGER.warn("Ignoring noncanonical Life stat $id (five-choice roster is fixed)")
+                continue
+            }
             try {
                 val obj = elem.asJsonObject
                 val def = parseStat(id, obj)

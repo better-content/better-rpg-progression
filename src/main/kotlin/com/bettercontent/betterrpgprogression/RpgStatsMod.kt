@@ -35,10 +35,7 @@ object RpgStatsMod {
             net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
                 com.bettercontent.betterrpgprogression.common.attribute.ColdSweatLifeCompat)
         }
-        if (ModList.get().isLoaded("epicfight")) {
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.register(
-                com.bettercontent.betterrpgprogression.common.attribute.EpicFightLifeCompat)
-        }
+        // The previous Air Slash/stamina-use Life hook is not a five-choice effect.
         // Everything else is registered via @EventBusSubscriber objects.
     }
 }

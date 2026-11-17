@@ -26,6 +26,17 @@ class StatsAllocationDraftTest {
     }
 
     @Test
+    fun `obsolete persisted allocations are not resent by a five choice draft`() {
+        val snapshot = ClientStatsSnapshot(unspent = 3, allocations = mapOf(
+            "better_rpg_progression:vanguard" to 9, "better_rpg_progression:power" to 2))
+        val draft = StatsAllocationDraft(snapshot, setOf("better_rpg_progression:power"))
+        assertEquals(mapOf("better_rpg_progression:power" to 2), draft.allocations)
+        assertTrue(draft.add("better_rpg_progression:power", -1))
+        assertEquals(2, draft.unspent)
+        assertEquals(9, snapshot.allocations["better_rpg_progression:vanguard"])
+    }
+
+    @Test
     fun `capped and exhausted attributes cannot be incremented`() {
         val draft = StatsAllocationDraft(ClientStatsSnapshot(unspent = 1, allocations = mapOf("arms" to 4)))
         assertFalse(draft.add("arms", 4))

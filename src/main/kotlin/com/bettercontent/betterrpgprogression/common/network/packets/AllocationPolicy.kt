@@ -16,7 +16,7 @@ object AllocationPolicy {
         requested: Map<String, Int>,
         maxPointsById: Map<String, Int>
     ): AllocationDecision? {
-        if (unspentPoints < 0) return null
+        if (unspentPoints < 0 || requested.any { (id, points) -> id !in maxPointsById || points <= 0 }) return null
 
         val result = current.filterValues { it > 0 }.toMutableMap()
         var additionalSpent = 0L

@@ -10,7 +10,6 @@ import com.bettercontent.betterrpgprogression.common.data.StatsCap
 import com.bettercontent.betterrpgprogression.common.network.Network
 import com.bettercontent.betterrpgprogression.common.reload.RegistryState
 import net.minecraft.network.FriendlyByteBuf
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraftforge.network.NetworkEvent
 import java.util.function.Supplier
@@ -30,12 +29,17 @@ data class C2SApplyStats(
 
         fun decode(buf: FriendlyByteBuf): C2SApplyStats {
             val n = buf.readVarInt()
+            if (n !in 0..256) return C2SApplyStats(mapOf("" to -1))
             val map = mutableMapOf<String, Int>()
+            var invalid = false
             repeat(n) {
-                val k = buf.readUtf(32767)
+                val k = buf.readUtf(128)
                 val v = buf.readVarInt()
-                if (v > 0) map[k] = v
+                if (k in map || v <= 0) invalid = true
+                map[k] = v
             }
+            // Preserve invalid/duplicate input as one rejected request, not a valid subset.
+            if (invalid) map[""] = -1
             return C2SApplyStats(map)
         }
 
@@ -46,17 +50,12 @@ data class C2SApplyStats(
                 val stats = StatsCap.get(sender) ?: return@enqueueWork
                 val defs = RegistryState.activeSnapshot()
 
-                val requestedKnown = mutableMapOf<String, Int>()
-                for ((idStr, ptsRaw) in msg.requested) {
-                    val id = ResourceLocation.tryParse(idStr) ?: continue
-                    if (id !in defs) continue
-                    if (ptsRaw > 0) requestedKnown[id.toString()] = ptsRaw
-                }
-
+                // AllocationPolicy rejects the entire packet for ANY unknown/stale/invalid
+                // entry. Never turn a mixed old+new request into a partial committed grant.
                 val decision = AllocationPolicy.apply(
                     current = stats.allocations,
                     unspentPoints = stats.unspentPoints,
-                    requested = requestedKnown,
+                    requested = msg.requested,
                     maxPointsById = defs.mapKeys { it.key.toString() }.mapValues { it.value.maxPoints }
                 )
                 if (decision == null) {

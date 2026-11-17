@@ -1,7 +1,5 @@
 package com.bettercontent.betterrpgprogression.common.reload
 
-import com.bettercontent.betterrpgprogression.common.attribute.EffectAvailability
-import com.bettercontent.betterrpgprogression.common.config.json.AttributeEffect
 import com.bettercontent.betterrpgprogression.common.config.json.StatDefinition
 import net.minecraft.resources.ResourceLocation
 
@@ -14,9 +12,6 @@ object RegistryState {
 
     fun snapshot(): Map<ResourceLocation, StatDefinition> = defs
 
-    fun activeSnapshot(): Map<ResourceLocation, StatDefinition> = defs.filterValues { definition ->
-        definition.effects.any { effect ->
-            effect is AttributeEffect && EffectAvailability.isAvailable(effect)
-        }
-    }
+    /** Keep every canonical Life choice visible; individual optional effects show unavailable. */
+    fun activeSnapshot(): Map<ResourceLocation, StatDefinition> = defs
 }

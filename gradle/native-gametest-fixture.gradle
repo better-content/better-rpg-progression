@@ -5,7 +5,7 @@ ext.bcNativeGameTestDirectory = nativeDirectory
 minecraft.runs.gameTestServer.workingDirectory(nativeDirectory)
 def expected = project.name == 'better-block-placement-preview' ? 6 :
         project.name == 'better-rehooked-grappling' ? 4 :
-        project.name == 'better-rpg-progression' ? 6 :
+        project.name == 'better-rpg-progression' ? 7 :
         project.findProperty('colonyWithoutBees') == 'true' ? 74 :
         project.findProperty('backpackWithoutCurios') == 'true' ? 73 : 76
 

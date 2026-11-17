@@ -1,0 +1,14 @@
+{
+  "name_key": "stat.better_rpg_progression.endurance",
+  "order": 30,
+  "icon": "∞",
+  "color": "#52606A",
+  "effects": [
+    {"type":"attribute","attribute":"parcool:max_stamina","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.12,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"parcool"},
+    {"type":"attribute","attribute":"epicfight:staminar","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.12,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"epicfight"},
+    {"type":"attribute","attribute":"better_rpg_progression:heat_drift_reduction","operation":"add","curve":{"type":"hyperbola","cap":0.15,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"cold_sweat"},
+    {"type":"attribute","attribute":"better_rpg_progression:cold_drift_reduction","operation":"add","curve":{"type":"hyperbola","cap":0.15,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"cold_sweat"},
+    {"type":"attribute","attribute":"better_rpg_progression:freezing_boundary_offset","operation":"add","curve":{"type":"linear","per_point":-0.025,"min":-0.5,"max":0.0},"requires_mod":"cold_sweat"},
+    {"type":"attribute","attribute":"better_rpg_progression:burning_boundary_offset","operation":"add","curve":{"type":"linear","per_point":0.025,"min":0.0,"max":0.5},"requires_mod":"cold_sweat"}
+  ]
+}

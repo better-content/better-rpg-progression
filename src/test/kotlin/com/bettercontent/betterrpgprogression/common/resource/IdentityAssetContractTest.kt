@@ -24,23 +24,32 @@ class IdentityAssetContractTest {
 
     @Test
     fun `badge font and motifs cover the exact identity contract`() {
-        assertEquals(listOf("vanguard", "sharpshooter", "artisan", "trailblazer", "survivalist", "spellcaster", "skirmisher", "aerialist"),
+        assertEquals(listOf("power", "motion", "endurance", "renewal", "control"),
             AspectIdentity.entries.map { it.statId })
+        assertEquals(listOf(0, 3, 4, 6, 7), AspectIdentity.entries.map { it.index })
         val badge = resource("/assets/better_rpg_progression/textures/gui/stat_badges.png")
         assertEquals("44bca8862f44432b70ea5066fa59f2973ac42fb9f3089bfb3ce0557a2b19527b",
             HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(badge)))
         ImageIO.read(badge.inputStream()).also { image -> assertEquals(144, image.width); assertEquals(18, image.height) }
         val font = resource("/assets/better_rpg_progression/font/stats.json").decodeToString()
         assertTrue(font.contains(""))
-        val sounds = resource("/assets/better_rpg_progression/sounds.json").decodeToString()
-        AspectIdentity.entries.forEachIndexed { index, aspect ->
-            assertEquals(index, aspect.index)
-            val id = aspect.name.lowercase()
-            assertTrue(sounds.contains("aspect.$id"))
+        val sounds = com.google.gson.JsonParser.parseString(
+            resource("/assets/better_rpg_progression/sounds.json").decodeToString()).asJsonObject
+        val inheritedMotifs = mapOf("power" to "impact", "motion" to "mobility",
+            "endurance" to "endurance", "renewal" to "renewal", "control" to "control")
+        assertEquals(inheritedMotifs.keys, sounds.keySet())
+        // The eight pre-existing assets stay byte-identical; five live event IDs alias
+        // their corresponding stable motif files without generating or duplicating audio.
+        motifHashes.forEach { (id, hash) ->
             val ogg = resource("/assets/better_rpg_progression/sounds/aspect/$id.ogg")
             assertTrue(ogg.size > 4000)
             assertArrayEquals("OggS".encodeToByteArray(), ogg.copyOfRange(0, 4))
-            assertEquals(motifHashes[id], HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ogg)), id)
+            assertEquals(hash, HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(ogg)), id)
+        }
+        AspectIdentity.entries.forEach { aspect ->
+            val id = aspect.name.lowercase()
+            assertEquals("better_rpg_progression:aspect/${inheritedMotifs.getValue(id)}",
+                sounds.getAsJsonObject("aspect.$id").getAsJsonArray("sounds")[0].asString)
         }
     }
 

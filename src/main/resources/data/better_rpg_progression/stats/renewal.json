@@ -1,0 +1,12 @@
+{
+  "name_key": "stat.better_rpg_progression.renewal",
+  "order": 40,
+  "icon": "✚",
+  "color": "#6CCAF0",
+  "effects": [
+    {"type":"attribute","attribute":"parcool:stamina_recovery","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.10,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"parcool"},
+    {"type":"attribute","attribute":"epicfight:stamina_regen","operation":"multiply_base","curve":{"type":"hyperbola","cap":0.10,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"epicfight"},
+    {"type":"attribute","attribute":"ars_nouveau:ars_nouveau.perk.mana_regen","operation":"add","curve":{"type":"hyperbola","cap":1.2,"k":10.0},"is_primary":false,"requires_mod":"ars_nouveau"},
+    {"type":"attribute","attribute":"goety:soul_discount","operation":"add","curve":{"type":"hyperbola","cap":0.06,"k":10.0},"is_primary":false,"display_as_percent":true,"requires_mod":"goety"}
+  ]
+}

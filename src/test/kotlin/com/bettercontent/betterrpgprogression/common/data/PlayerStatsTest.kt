@@ -73,17 +73,29 @@ class PlayerStatsTest {
     }
 
     @Test
-    fun `auto plan serializes separately from Life points`() {
+    fun `save round trip retains Life ledger and independent auto plan`() {
         val stats = PlayerStats().apply {
+            lifePeakLevel = 42
+            unspentPoints = 3
+            lifeAllocationEpisode = "pending-episode"
+            allocations["better_rpg_progression:vanguard"] = 8
             autoAllocationEnabled = true
             autoAllocationCursor = 1
-            autoAllocationPlan += listOf("better_rpg_progression:arms", "better_rpg_progression:hands")
+            autoAllocationPlan += listOf("better_rpg_progression:vanguard", "", "better_rpg_progression:artisan")
         }
         val restored = PlayerStats().apply { deserializeNBT(stats.serializeNBT()) }
 
+        assertEquals(stats.serializeNBT(), restored.serializeNBT())
+        assertEquals(42, restored.lifePeakLevel)
+        assertEquals(3, restored.unspentPoints)
+        assertEquals("pending-episode", restored.lifeAllocationEpisode)
+        assertEquals(mapOf("better_rpg_progression:vanguard" to 8), restored.allocations)
         assertTrue(restored.autoAllocationEnabled)
         assertEquals(1, restored.autoAllocationCursor)
-        assertEquals(listOf("better_rpg_progression:arms", "better_rpg_progression:hands"), restored.autoAllocationPlan)
-        assertEquals(0, restored.unspentPoints)
+        assertEquals(listOf("better_rpg_progression:vanguard", "", "better_rpg_progression:artisan"), restored.autoAllocationPlan)
+        restored.allocations.clear()
+        restored.autoAllocationPlan.clear()
+        assertEquals(8, stats.allocations["better_rpg_progression:vanguard"])
+        assertEquals(3, stats.autoAllocationPlan.size)
     }
 }

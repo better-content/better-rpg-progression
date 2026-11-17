@@ -37,8 +37,12 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
         }.pos(x + 101, y).size(80, 19).build())
         addRenderableWidget(Button.builder(Component.translatable("screen.better_rpg_progression.done")) {
             trimTail()
-            Network.sendToServer(C2SAutoAllocationPlan(enabled, plan.toList()))
-            minecraft?.setScreen(returnTo)
+            val availableIds = ClientCache.defs.mapTo(mutableSetOf()) { it.id }
+            if (plan.all { it.isEmpty() || it in availableIds }) {
+                Network.sendToServer(C2SAutoAllocationPlan(enabled, plan.toList()))
+                minecraft?.setScreen(returnTo)
+            }
+            // Keep the editor open for an obsolete slot; never submit a partial plan.
         }.pos(left + pageWidth - 92, y).size(80, 19).build())
         val definitions = ClientCache.defs
         val buttonWidth = minOf(230, pageWidth - 40)
@@ -87,14 +91,17 @@ class AutoAllocationScreen(private val returnTo: Screen) : Screen(Component.tran
             centered(graphics, "Lv $level", cardX + 22, timelineY + 4, ink)
             val definition = ClientCache.defs.firstOrNull { it.id == assigned }
             val entryLabel = definition?.let { Component.translatable(it.nameKey) }
-            val name = entryLabel?.string
+            val obsolete = assigned.isNotEmpty() && definition == null
+            val name = if (obsolete) Component.translatable("screen.better_rpg_progression.obsolete_plan").string else entryLabel?.string
             if (mouseX in cardX until (cardX + cardWidth - 3) && mouseY in timelineY until (timelineY + 42)) {
-                hoveredEntry = entryLabel
+                hoveredEntry = if (obsolete) Component.translatable("screen.better_rpg_progression.obsolete_plan_hint", assigned) else entryLabel
             }
             val entryColor = definition?.let { it.color or 0xFF000000.toInt() } ?: ink
             centered(graphics, font.plainSubstrByWidth(name ?: "—", 41), cardX + 22, timelineY + 22, entryColor)
         }
-        centered(graphics, "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, muted)
+        centered(graphics, if (plan.any { it.isNotEmpty() && ClientCache.defs.none { def -> def.id == it } })
+            Component.translatable("screen.better_rpg_progression.obsolete_plan_hint_short").string
+            else "DRAG OR SCROLL LEVELS", width / 2, y + pageHeight - 17, muted)
         super.render(graphics, mouseX, mouseY, partialTick)
         children().filterIsInstance<Button>().filter { it.visible }.forEach { button ->
             val bx = button.x; val by = button.y; val bw = button.width; val bh = button.height

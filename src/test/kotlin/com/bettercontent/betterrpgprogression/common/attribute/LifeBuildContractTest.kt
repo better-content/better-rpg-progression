@@ -9,11 +9,12 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class LifeBuildContractTest {
-    private val builds = listOf("vanguard", "sharpshooter", "artisan", "trailblazer", "survivalist", "spellcaster", "skirmisher", "aerialist")
-    private val retired = listOf("arms", "hands", "fingers", "lungs", "blood", "skin", "liver", "eyes")
+    private val builds = listOf("power", "motion", "endurance", "renewal", "control")
+    private val retired = listOf("vanguard", "sharpshooter", "artisan", "trailblazer", "survivalist",
+        "spellcaster", "skirmisher", "aerialist", "arms", "hands", "fingers", "lungs", "blood", "skin", "liver", "eyes")
 
     @Test
-    fun `active stat resources have eight new IDs and no retired definitions`() {
+    fun `active stat resources have precisely five aspects and no retired definitions`() {
         builds.forEach { assertTrue(javaClass.getResource("/data/better_rpg_progression/stats/$it.json") != null, it) }
         retired.forEach { assertFalse(javaClass.getResource("/data/better_rpg_progression/stats/$it.json") != null, it) }
         builds.forEach { id ->
@@ -31,12 +32,12 @@ class LifeBuildContractTest {
             json.getAsJsonArray("effects").forEach { row ->
                 val effect = row.asJsonObject
                 val curve = effect.getAsJsonObject("curve")
-                val primary = effect.get("is_primary").asBoolean
-                val def = if (primary) CurveDef(type = "linear", perPoint = curve.get("per_point").asDouble,
+                val linear = curve.get("type").asString == "linear"
+                val def = if (linear) CurveDef(type = "linear", perPoint = curve.get("per_point").asDouble,
                     min = curve.get("min").asDouble, max = curve.get("max").asDouble)
                 else CurveDef(type = "hyperbola", cap = curve.get("cap").asDouble, k = curve.get("k").asDouble)
                 points.forEach { p ->
-                    val expected = if (primary) curve.get("per_point").asDouble * p.coerceAtMost(20)
+                    val expected = if (linear) curve.get("per_point").asDouble * p.coerceAtMost(20)
                         else curve.get("cap").asDouble * p / (p + 10.0)
                     assertEquals(expected, Curves.eval(p, def), 1e-9, "$id/${effect.get("attribute").asString} at $p")
                 }
@@ -45,7 +46,7 @@ class LifeBuildContractTest {
     }
 
     @Test
-    fun `air attack cost and air slash ratio preserve the pinned base`() {
+    fun `retired aerial helper remains numerically pinned but has no active Life definition or registration`() {
         assertEquals(1.84f, LifeEffectsMath.airAttackCost(2f, 0.08), 1e-5f)
         assertTrue(LifeEffectsMath.airAttackCost(0.0001f, 1.0) > 0f)
         assertEquals(0f, LifeEffectsMath.airAttackCost(0f, 0.99))

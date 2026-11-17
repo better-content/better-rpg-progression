@@ -4,7 +4,6 @@ import com.bettercontent.betterrpgprogression.RpgStatsMod
 import com.bettercontent.betterrpgprogression.diagnostics.PlaytestDiagnostics
 import com.bettercontent.betterrpgprogression.diagnostics.ProgressionOutcomes
 import com.bettercontent.betterrpgprogression.common.attribute.MiningSpeedScaling
-import com.bettercontent.betterrpgprogression.common.attribute.OutgoingDamageScaling
 import com.bettercontent.betterrpgprogression.common.attribute.ModAttributes
 import com.bettercontent.betterrpgprogression.common.attribute.StatAttributeProjector
 import com.bettercontent.betterrpgprogression.common.data.PlayerStatsProvider
@@ -26,7 +25,6 @@ import net.minecraftforge.event.AddReloadListenerEvent
 import net.minecraftforge.event.AttachCapabilitiesEvent
 import net.minecraftforge.event.TickEvent
 import net.minecraftforge.event.entity.living.LivingDeathEvent
-import net.minecraftforge.event.entity.living.LivingHurtEvent
 import net.minecraftforge.event.entity.player.PlayerEvent
 import net.minecraftforge.eventbus.api.EventPriority
 import net.minecraftforge.eventbus.api.SubscribeEvent
@@ -118,13 +116,10 @@ object CommonForgeEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     fun onBreakSpeed(event: PlayerEvent.BreakSpeed) {
+        // Power's Life mining bonus applies only when the held tool is correct for drops.
+        if (!event.entity.mainHandItem.isCorrectToolForDrops(event.state)) return
         val multiplier = event.entity.getAttributeValue(ModAttributes.MINING_SPEED.get())
         event.newSpeed = MiningSpeedScaling.scale(event.newSpeed, multiplier)
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    fun onLivingHurt(event: LivingHurtEvent) {
-        if (!event.isCanceled) event.amount = OutgoingDamageScaling.scale(event.source, event.entity, event.amount)
     }
 
     @SubscribeEvent

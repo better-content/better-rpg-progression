@@ -15,66 +15,53 @@ import kotlin.test.assertTrue
 class RpgStatsResourceTest {
     private data class AspectContract(val order: Int, val color: String, val icon: String)
     private val aspects = linkedMapOf(
-        "vanguard" to AspectContract(10, "#FF4055", "✦"),
-        "sharpshooter" to AspectContract(20, "#8E5BB7", "⊕"),
-        "artisan" to AspectContract(30, "#F0E2C5", "⚒"),
-        "trailblazer" to AspectContract(40, "#E0B01F", "➜"),
-        "survivalist" to AspectContract(50, "#AF6A2F", "◆"),
-        "spellcaster" to AspectContract(60, "#6CCAF0", "✚"),
-        "skirmisher" to AspectContract(70, "#52606A", "∞"),
-        "aerialist" to AspectContract(80, "#00A985", "»")
+        "power" to AspectContract(10, "#FF4055", "✦"),
+        "motion" to AspectContract(20, "#E0B01F", "➜"),
+        "endurance" to AspectContract(30, "#52606A", "∞"),
+        "renewal" to AspectContract(40, "#6CCAF0", "✚"),
+        "control" to AspectContract(50, "#8E5BB7", "⊕")
     )
     private val effectIds = mapOf(
-        "vanguard" to setOf("epicfight:armor_negation", "minecraft:generic.attack_knockback", "epicfight:impact"),
-        "sharpshooter" to setOf("better_rpg_progression:arrow_spread_reduction", "better_rpg_progression:dispersion_reduction",
-            "better_rpg_progression:recoil_reduction", "better_rpg_progression:arrow_speed_bonus"),
-        "artisan" to setOf("better_rpg_progression:mining_speed", "tconstruct:player.use_item_speed", "forge:block_reach"),
-        "trailblazer" to setOf("tconstruct:generic.safe_fall_distance", "forge:swim_speed", "forge:step_height_addition"),
-        "survivalist" to setOf("better_rpg_progression:heat_drift_reduction", "better_rpg_progression:cold_drift_reduction",
-            "better_rpg_progression:freezing_boundary_offset", "better_rpg_progression:burning_boundary_offset"),
-        "spellcaster" to setOf("ars_nouveau:ars_nouveau.perk.max_mana", "ars_nouveau:ars_nouveau.perk.mana_regen",
-            "goety:soul_discount", "goety:casting_speed", "goety:spell_range"),
-        "skirmisher" to setOf("parcool:max_stamina", "parcool:stamina_recovery", "epicfight:staminar", "epicfight:stamina_regen"),
-        "aerialist" to setOf("tconstruct:generic.jump_boost", "better_rpg_progression:air_attack_stamina_reduction",
-            "better_rpg_progression:air_slash_damage_bonus")
+        "power" to setOf("epicfight:impact", "better_rpg_progression:mining_speed", "forge:block_reach"),
+        "motion" to setOf("tconstruct:generic.safe_fall_distance", "forge:swim_speed", "forge:step_height_addition"),
+        "endurance" to setOf("parcool:max_stamina", "epicfight:staminar", "better_rpg_progression:heat_drift_reduction",
+            "better_rpg_progression:cold_drift_reduction", "better_rpg_progression:freezing_boundary_offset",
+            "better_rpg_progression:burning_boundary_offset"),
+        "renewal" to setOf("parcool:stamina_recovery", "epicfight:stamina_regen",
+            "ars_nouveau:ars_nouveau.perk.mana_regen", "goety:soul_discount"),
+        "control" to setOf("better_rpg_progression:arrow_spread_reduction", "better_rpg_progression:dispersion_reduction",
+            "better_rpg_progression:recoil_reduction", "goety:casting_speed")
     )
     private val landmarks = mapOf(
-        "vanguard" to setOf("epicfight:impact"),
-        "sharpshooter" to setOf("better_rpg_progression:arrow_speed_bonus"),
-        "artisan" to setOf("forge:block_reach"),
-        "trailblazer" to setOf("forge:step_height_addition"),
-        "survivalist" to setOf("better_rpg_progression:freezing_boundary_offset", "better_rpg_progression:burning_boundary_offset"),
-        "spellcaster" to setOf("goety:spell_range"),
-        "skirmisher" to emptySet(),
-        "aerialist" to setOf("better_rpg_progression:air_slash_damage_bonus")
+        "power" to setOf("epicfight:impact", "forge:block_reach"),
+        "motion" to setOf("tconstruct:generic.safe_fall_distance", "forge:step_height_addition"),
+        "endurance" to setOf("better_rpg_progression:freezing_boundary_offset", "better_rpg_progression:burning_boundary_offset"),
+        "renewal" to emptySet(),
+        "control" to emptySet()
     )
     private val landmarkAt20 = mapOf(
-        "epicfight:impact" to 0.60, "better_rpg_progression:arrow_speed_bonus" to 0.08,
-        "forge:block_reach" to 1.0, "forge:step_height_addition" to 0.4,
+        "epicfight:impact" to 0.60, "forge:block_reach" to 1.0,
+        "forge:step_height_addition" to 0.4,
         "better_rpg_progression:freezing_boundary_offset" to -0.5,
-        "better_rpg_progression:burning_boundary_offset" to 0.5,
-        "goety:spell_range" to 1.0, "better_rpg_progression:air_slash_damage_bonus" to 0.30
+        "better_rpg_progression:burning_boundary_offset" to 0.5
     )
     private val steadyCaps = mapOf(
-        "epicfight:armor_negation" to 6.0, "minecraft:generic.attack_knockback" to 0.20,
+        "better_rpg_progression:mining_speed" to 0.12,
+        "tconstruct:generic.safe_fall_distance" to 3.0, "forge:swim_speed" to 0.15,
+        "parcool:max_stamina" to 0.12, "epicfight:staminar" to 0.12,
+        "better_rpg_progression:heat_drift_reduction" to 0.15,
+        "better_rpg_progression:cold_drift_reduction" to 0.15,
+        "parcool:stamina_recovery" to 0.10, "epicfight:stamina_regen" to 0.10,
+        "ars_nouveau:ars_nouveau.perk.mana_regen" to 1.2,
+        "goety:soul_discount" to 0.06,
         "better_rpg_progression:arrow_spread_reduction" to 0.18,
         "better_rpg_progression:dispersion_reduction" to 0.18,
         "better_rpg_progression:recoil_reduction" to 0.12,
-        "better_rpg_progression:mining_speed" to 0.12, "tconstruct:player.use_item_speed" to 0.09,
-        "tconstruct:generic.safe_fall_distance" to 3.0, "forge:swim_speed" to 0.15,
-        "better_rpg_progression:heat_drift_reduction" to 0.15,
-        "better_rpg_progression:cold_drift_reduction" to 0.15,
-        "ars_nouveau:ars_nouveau.perk.max_mana" to 60.0,
-        "ars_nouveau:ars_nouveau.perk.mana_regen" to 1.2,
-        "goety:soul_discount" to 0.06, "goety:casting_speed" to 0.08,
-        "parcool:max_stamina" to 0.12, "parcool:stamina_recovery" to 0.10,
-        "epicfight:staminar" to 0.12, "epicfight:stamina_regen" to 0.10,
-        "tconstruct:generic.jump_boost" to 0.09,
-        "better_rpg_progression:air_attack_stamina_reduction" to 0.12
+        "goety:casting_speed" to 0.08
     )
 
     @Test
-    fun `bundled rows are exactly the eight build-oriented Life identities`() {
+    fun `bundled rows are exactly the five Life aspects`() {
         val files = statFiles()
         assertEquals(aspects.keys, files.map { it.name.removeSuffix(".json") }.toSet())
         files.forEach { path ->
@@ -154,7 +141,7 @@ class RpgStatsResourceTest {
             rows.forEach { assertFalse("spirit" in it.string("attribute"), "$path modifies spirit commerce") }
         }
         val language = readJson(Path.of("src/main/resources/assets/better_rpg_progression/lang/en_us.json"))
-        assertEquals("Survivalist", language.string("stat.better_rpg_progression.survivalist"))
+        assertEquals("Endurance", language.string("stat.better_rpg_progression.endurance"))
     }
 
     @Test
