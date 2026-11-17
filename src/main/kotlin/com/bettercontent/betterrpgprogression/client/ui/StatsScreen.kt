@@ -162,7 +162,7 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
         graphics.drawString(font, text("learning_title"), 0, 0, INK, false)
         graphics.pose().popPose()
         graphics.drawString(font, text("learning_hint"), 16, 53, MUTED, false)
-        val available = text(if (draft.unspent == 1) "available_one" else "available_short", draft.unspent).string
+        val available = text("budget", draft.unspent, draft.spent).string
         graphics.drawString(font, available, layout.width - 16 - font.width(available), 20, GAIN, false)
         val peak = text("life_peak", snapshot.lifePeak).string
         graphics.drawString(font, peak, layout.width - 16 - font.width(peak), 36, MUTED, false)
@@ -190,6 +190,7 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
             graphics.drawString(font, formatted, x + 10, y + 34 + line * 10, INK, false)
         }
         val points = draft.points(def.id)
+        val committed = committedPoints(def)
         val movementBase = movementBase()
         def.effects.filter { it.isPrimary }.ifEmpty { def.effects }.take(2).forEachIndexed { effectIndex, effect ->
             val reading = effectReading(def, effect, points, movementBase)
@@ -204,9 +205,7 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
         val controlsY = y + h - 26
         graphics.fill(x + 10, controlsY - 6, x + w - 10, controlsY - 5, BORDER)
         val pending = draft.pending(def.id)
-        val counter = if (def.maxPoints >= 0) "$points/${def.maxPoints}" else points.toString()
-        val count = if (pending > 0) text(if (points == 1) "point_draft" else "points_draft", counter, pending)
-            else text(if (points == 1) "point_count" else "points_count", counter)
+        val count = text("card_points", committed, points, pending)
         graphics.drawString(font, count, x + (w - font.width(count)) / 2, controlsY + 5,
             if (pending > 0) GAIN else MUTED, false)
     }
@@ -223,17 +222,19 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
         graphics.drawString(font, purpose(def), x + 108, y + 23, INK, false)
         val points = draft.points(def.id)
         val pending = draft.pending(def.id)
-        graphics.drawString(font, text("detail_points", points, pending), x + 14, y + 47, GAIN, false)
+        graphics.drawString(font, text("detail_points", committedPoints(def), points, pending), x + 14, y + 47, GAIN, false)
         val effects = def.effects
         if (effects.isEmpty()) graphics.drawString(font, text("no_active_effects"), x + 14, y + 75, MUTED, false)
         val groups = effects.map { StatsEffectPresentation.group(it.attributeId) }
         val groupCount = groups.distinct().size
         val rowHeight = minOf(34, (bottom - y - 125 - groupCount * 15) / effects.size.coerceAtLeast(1)).coerceAtLeast(19)
-        val valueX = x + w - 117
+        val currentX = x + w - 174
+        val draftX = x + w - 91
         val nextX = x + w - 15
         graphics.drawString(font, text("effect_column"), x + 14, y + 70, MUTED, false)
-        graphics.drawString(font, text("bonus_column"), valueX - 55, y + 70, MUTED, false)
-        graphics.drawString(font, text("next_column"), nextX - 52, y + 70, GAIN, false)
+        graphics.drawString(font, text("current_column"), currentX - 55, y + 70, MUTED, false)
+        graphics.drawString(font, text("draft_column"), draftX - 48, y + 70, GAIN, false)
+        graphics.drawString(font, text("next_column"), nextX - 34, y + 70, GAIN, false)
         val movementBase = movementBase()
         var rowY = y + 85
         effects.forEachIndexed { index, effect ->
@@ -245,17 +246,20 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
             if (rowY + 18 >= bottom - 32) return@forEachIndexed
             if (effect.isPrimary) graphics.fill(x + 9, rowY - 3, x + 11, rowY + 14, accent)
             val name = effectName(effect.attributeId).string
-            graphics.drawString(font, font.plainSubstrByWidth(name, (valueX - x - 85).coerceAtLeast(30)), x + 16, rowY,
+            graphics.drawString(font, font.plainSubstrByWidth(name, (currentX - x - 65).coerceAtLeast(30)), x + 16, rowY,
                 if (effect.available) INK else DISABLED, false)
             val isRange = effect.attributeId == "goety:spell_range"
             if (!effect.available) {
-                graphics.drawString(font, text("unavailable"), valueX - 90, rowY, DISABLED, false)
+                graphics.drawString(font, text("unavailable_short"), draftX - 90, rowY, DISABLED, false)
             } else {
+                val current = effectReading(def, effect, committedPoints(def), movementBase)
                 val reading = effectReading(def, effect, points, movementBase)
                 val bonus = StatsEffectPresentation.format(reading.bonus, reading.percent)
+                val now = StatsEffectPresentation.format(current.bonus, current.percent)
                 val next = if (def.maxPoints >= 0 && points >= def.maxPoints) "—"
                     else StatsEffectPresentation.format(reading.next, reading.percent)
-                graphics.drawString(font, bonus, valueX - font.width(bonus), rowY, INK, false)
+                graphics.drawString(font, now, currentX - font.width(now), rowY, MUTED, false)
+                graphics.drawString(font, bonus, draftX - font.width(bonus), rowY, if (pending > 0) GAIN else INK, false)
                 graphics.drawString(font, next, nextX - font.width(next), rowY, GAIN, false)
             }
             val milestone = if (isRange && effect.available) spellRangeAt(def, effect, 20)
@@ -285,12 +289,15 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
             if (index < effects.lastIndex) graphics.fill(x + 14, rowY + rowHeight - 1, x + w - 14, rowY + rowHeight, BORDER)
             rowY += rowHeight
         }
+        graphics.drawString(font, text("legend"), x + 14, bottom - 18, MUTED, false)
     }
 
     /** Screen text is drawn on a canvas; keep its numbers available to keyboard narration too. */
     private fun detailNarration(def: ClientStatDef): Component {
         val summary = text("overview").copy().append(". ").append(Component.translatable(def.nameKey))
         val points = draft.points(def.id)
+        summary.append(". ").append(text("detail_points", committedPoints(def), points, draft.pending(def.id)))
+        summary.append(". ").append(text("life_rule"))
         def.effects.forEach { effect ->
             summary.append(". ").append(effectName(effect.attributeId)).append(": ")
             if (!effect.available) {
@@ -300,7 +307,9 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
                         StatsEffectPresentation.read(effect, 20).percent)))
             } else {
                 val reading = effectReading(def, effect, points, movementBase())
-                summary.append(text("narrated_effect", StatsEffectPresentation.format(reading.bonus, reading.percent),
+                val current = effectReading(def, effect, committedPoints(def), movementBase())
+                summary.append(text("narrated_effect", StatsEffectPresentation.format(current.bonus, current.percent),
+                    StatsEffectPresentation.format(reading.bonus, reading.percent),
                     StatsEffectPresentation.format(reading.next, reading.percent)))
                 val target = if (effect.attributeId == "goety:spell_range") spellRangeAt(def, effect, 20)
                     else StatsEffectPresentation.read(effect, 20, movementBase())
@@ -320,6 +329,8 @@ class StatsScreen @JvmOverloads constructor(private val returnTo: Screen? = null
         }
         return summary
     }
+
+    private fun committedPoints(def: ClientStatDef) = snapshot.allocations[def.id] ?: 0
 
     private fun effectReading(def: ClientStatDef, effect: ClientEffectDef, points: Int, movementBase: Double) =
         if (effect.attributeId == "goety:spell_range") spellRangeAt(def, effect, points)
