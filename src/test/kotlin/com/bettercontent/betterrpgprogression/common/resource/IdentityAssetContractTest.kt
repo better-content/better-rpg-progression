@@ -37,7 +37,7 @@ class IdentityAssetContractTest {
             resource("/assets/better_rpg_progression/sounds.json").decodeToString()).asJsonObject
         val inheritedMotifs = mapOf("power" to "impact", "motion" to "mobility",
             "endurance" to "endurance", "renewal" to "renewal", "control" to "control")
-        assertEquals(inheritedMotifs.keys, sounds.keySet())
+        assertEquals(inheritedMotifs.keys.map { "aspect.$it" }.toSet(), sounds.keySet())
         // The eight pre-existing assets stay byte-identical; five live event IDs alias
         // their corresponding stable motif files without generating or duplicating audio.
         motifHashes.forEach { (id, hash) ->
