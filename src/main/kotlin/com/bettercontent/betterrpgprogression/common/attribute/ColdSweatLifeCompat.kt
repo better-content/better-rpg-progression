@@ -24,9 +24,9 @@ object ColdSweatLifeCompat {
     fun gatherModifiers(event: GatherDefaultTempModifiersEvent) {
         if (event.entity !is ServerPlayer) return
         when (event.trait) {
-            Temperature.Trait.RATE -> event.addModifier(SurvivalistRateModifier())
-            Temperature.Trait.FREEZING_POINT -> event.addModifier(SurvivalistFreezingModifier())
-            Temperature.Trait.BURNING_POINT -> event.addModifier(SurvivalistBurningModifier())
+            Temperature.Trait.RATE -> retainSingleOwnedModifier(event.modifiers, { it is SurvivalistRateModifier }, ::SurvivalistRateModifier)
+            Temperature.Trait.FREEZING_POINT -> retainSingleOwnedModifier(event.modifiers, { it is SurvivalistFreezingModifier }, ::SurvivalistFreezingModifier)
+            Temperature.Trait.BURNING_POINT -> retainSingleOwnedModifier(event.modifiers, { it is SurvivalistBurningModifier }, ::SurvivalistBurningModifier)
             else -> Unit
         }
     }
