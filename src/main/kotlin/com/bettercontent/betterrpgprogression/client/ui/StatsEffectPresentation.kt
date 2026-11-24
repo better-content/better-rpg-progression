@@ -74,6 +74,8 @@ internal object StatsEffectPresentation {
         attributeId.startsWith("tconstruct:") -> "tconstruct"
         attributeId.startsWith("ars_nouveau:") -> "ars_nouveau"
         attributeId.startsWith("goety:") -> "goety"
+        attributeId in setOf("better_rpg_progression:recoil_reduction",
+            "better_rpg_progression:dispersion_reduction") -> "tacz"
         attributeId.startsWith("parcool:") -> "parcool"
         attributeId.startsWith("cold_sweat:") -> "cold_sweat"
         else -> "life"

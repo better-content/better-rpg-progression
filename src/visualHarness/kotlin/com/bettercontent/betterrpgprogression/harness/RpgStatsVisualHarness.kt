@@ -23,7 +23,7 @@ object RpgStatsVisualHarness {
     private data class Case(val name: String, val scale: Int = 3, val pending: Boolean = false,
         val empty: Boolean = false, val exhausted: Boolean = false, val capped: Boolean = false,
         val nativeOnly: Boolean = false, val width: Int = 1920, val height: Int = 1080,
-        val detailId: String? = null, val simulatedAllIntegrations: Boolean = false)
+        val simulatedAllIntegrations: Boolean = false)
     private val cases = listOf(
         Case("empty-full-gui3", empty = true),
         Case("draft-full-gui3", pending = true),
@@ -33,18 +33,12 @@ object RpgStatsVisualHarness {
         Case("capped-full-gui3", capped = true),
         Case("empty-native-gui3", nativeOnly = true, empty = true),
         Case("draft-1280-gui3", pending = true, width = 1280, height = 720),
-        Case("presentation-only-detail-vanguard-gui3", detailId = "vanguard", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-sharpshooter-gui3", detailId = "sharpshooter", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-artisan-gui3", detailId = "artisan", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-trailblazer-gui3", detailId = "trailblazer", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-survivalist-gui3", detailId = "survivalist", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-spellcaster-gui4", scale = 4, detailId = "spellcaster", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-skirmisher-gui2", scale = 2, detailId = "skirmisher", simulatedAllIntegrations = true),
-        Case("presentation-only-detail-aerialist-1280-gui3", width = 1280, height = 720,
-            detailId = "aerialist", simulatedAllIntegrations = true),
-        Case("detail-spellcaster-unavailable-gui3", detailId = "spellcaster"),
-        Case("detail-survivalist-unavailable-gui3", detailId = "survivalist"),
-        Case("detail-skirmisher-unavailable-gui3", detailId = "skirmisher")
+        Case("presentation-only-all-available-gui2", scale = 2, pending = true, simulatedAllIntegrations = true),
+        Case("presentation-only-all-available-gui3", pending = true, simulatedAllIntegrations = true),
+        Case("presentation-only-all-available-gui4", scale = 4, pending = true, simulatedAllIntegrations = true),
+        Case("presentation-only-all-available-1280-gui3", pending = true, width = 1280, height = 720,
+            simulatedAllIntegrations = true),
+        Case("presentation-only-all-available-no-points-gui3", exhausted = true, simulatedAllIntegrations = true)
     )
     private var startupTicks = 0
     private var caseIndex = -1
@@ -89,21 +83,24 @@ object RpgStatsVisualHarness {
         if (ticks < 35) return
         val case = cases[caseIndex]
         check(mc.window.width == case.width && mc.window.height == case.height) { "Wrong framebuffer dimensions" }
+        val scale = mc.window.calculateScale(case.scale, mc.isEnforceUnicode)
+        check(mc.window.guiScale == scale.toDouble()) { "Wrong active GUI scale for ${case.name}" }
         check(mc.screen is StatsScreen)
-        check(buttons(mc.screen as StatsScreen).size == 31) {
-            "Expected 16 allocation, 8 detail, 3 selection and 4 footer controls"
+        val controls = buttons(mc.screen as StatsScreen)
+        check(controls.size == 14 && controls.all { it.visible }) {
+            "Expected only the 10 visible allocation and 4 footer controls on the first screen"
         }
         capturing = true
-        val fileName = "allocation-${case.name}.png"
+        val fileName = "allocation-inline-${case.name}.png"
         Screenshot.grab(mc.gameDirectory, fileName, mc.mainRenderTarget) { message ->
-            println("RPG_STATS_REVIEW captured=$fileName framebuffer=${case.width}x${case.height} $message")
+            println("RPG_STATS_REVIEW captured=$fileName framebuffer=${case.width}x${case.height} scale=$scale $message")
             mc.execute {
                 try {
                     capturing = false
                     if (caseIndex + 1 < cases.size) open(mc, caseIndex + 1) else {
                         finished = true
                         ticks = 0
-                        println("RPG_STATS_REVIEW PASS ${cases.size} native captures; eight detail sheets and draft/reset/undo/cap/return callbacks verified; no pointer simulation")
+                        println("RPG_STATS_REVIEW PASS ${cases.size} native captures of the first screen; draft/reset/undo/cap/return callbacks verified; no pointer simulation")
                     }
                 } catch (failure: Throwable) { fail(failure) }
             }
@@ -118,47 +115,30 @@ object RpgStatsVisualHarness {
         mc.options.guiScale().set(case.scale)
         mc.resizeDisplay()
         val definitions = loadDefinitions(case.nativeOnly, case.simulatedAllIntegrations)
-        ClientCache.defs = if (case.capped) definitions.map { if (it.id.endsWith(":vanguard")) it.copy(maxPoints = 4) else it } else definitions
+        ClientCache.defs = if (case.capped) definitions.map { if (it.id.endsWith(":power")) it.copy(maxPoints = 4) else it } else definitions
         ClientCache.stats = ClientStatsSnapshot(
             unspent = if (case.exhausted) 0 else 4, lifePeak = 27,
-            allocations = if (case.empty) emptyMap() else AspectIdentity.entries
-                .filterNot { case.simulatedAllIntegrations && it.statId == "spellcaster" }
-                .associate { "better_rpg_progression:${it.statId}" to if (it.statId == "vanguard") 4 else 2 }
+            allocations = if (case.empty) emptyMap() else definitions.associate { it.id to if (it.id.endsWith(":power")) 4 else 2 }
         )
         val screen = StatsScreen()
         mc.setScreen(screen)
         val plus = buttons(screen).filter { it.message.string.startsWith("Add a point") }
         val minus = buttons(screen).filter { it.message.string.startsWith("Remove a draft") }
+        check(plus.size == 5 && minus.size == 5)
         check(minus.none { it.active }) { "Committed points can be refunded" }
         if (case.pending) {
-            listOf(0, 3, 7).forEach { plus[it].onPress() }
+            val draftedCards = listOf(0, 2, 4)
+            draftedCards.forEach { plus[it].onPress() }
             check(buttons(screen).any { it.message.string == "Commit 3 points" && it.active })
-            minus[7].onPress()
+            minus[4].onPress()
             check(buttons(screen).any { it.message.string == "Commit 2 points" && it.active })
             buttons(screen).first { it.message.string == "Reset draft" }.onPress()
             check(buttons(screen).none { it.message.string.startsWith("Commit") && it.active })
-            listOf(0, 3, 7).forEach { plus[it].onPress() }
+            draftedCards.forEach { plus[it].onPress() }
         }
         if (case.capped) check(!plus.first().active) { "Capped allocation can be incremented" }
         if (case.exhausted) check(plus.none { it.active }) { "Allocation possible with no points" }
-        if (case.simulatedAllIntegrations && case.detailId == "spellcaster") {
-            // No world/attribute exists in this harness: use draft points rather than falsely
-            // subtracting a committed Goety range modifier from a missing live attribute.
-            repeat(2) { plus[5].onPress() }
-        }
-        case.detailId?.let { id ->
-            val def = ClientCache.defs.single { it.id.endsWith(":$id") }
-            buttons(screen).single {
-                it.message.string == "View all ${Component.translatable(def.nameKey).string} effects ›"
-            }.onPress()
-            check(buttons(screen).single { it.message.string.startsWith("All builds.") }.visible) {
-                "Detail sheet did not open for $id"
-            }
-            check(def.effects.size == when (id) { "spellcaster" -> 5; "survivalist", "skirmisher" -> 4; else -> def.effects.size }) {
-                "Expected complete conditional detail for $id"
-            }
-        }
-        auditText(mc, ClientCache.defs)
+        auditEffects(screen, definitions, case)
         println("RPG_STATS_REVIEW ready=${case.name} mode=${if (case.simulatedAllIntegrations) "PRESENTATION_ONLY simulated availability; no mods/player/world" else "actual loaded-mod availability"} effects=${ClientCache.defs.sumOf { it.effects.size }} gui=${mc.window.guiScaledWidth}x${mc.window.guiScaledHeight}")
     }
 
@@ -190,22 +170,18 @@ object RpgStatsVisualHarness {
             obj.get("color").asString.removePrefix("#").toInt(16))
     }
 
-    /** Real font metrics, including the 5-effect worst case, before any screenshot is accepted. */
-    private fun auditText(mc: Minecraft, definitions: List<ClientStatDef>) {
-        val scale = minOf(1f, mc.window.guiScaledWidth / 800f, mc.window.guiScaledHeight / 500f)
-        val canvasWidth = (mc.window.guiScaledWidth / scale).toInt()
-        val cardWidth = (canvasWidth - 32 - 30) / 4
+    private fun auditEffects(screen: StatsScreen, definitions: List<ClientStatDef>, case: Case) {
+        val counts = mapOf("power" to 3, "motion" to 3, "endurance" to 6, "renewal" to 4, "control" to 4)
+        val narration = if (case.exhausted) screen.getNarrationMessage().string else null
         definitions.forEach { def ->
-            check(mc.font.width(Component.translatable(def.nameKey)) <= cardWidth - 43) { "Name does not fit: ${def.id}" }
-            val purpose = Component.translatable("${def.nameKey}.purpose")
-            check(mc.font.split(purpose, cardWidth - 20).size <= 2) { "Purpose exceeds two lines: ${def.id}" }
-            check(def.effects.size <= 5) { "Effect table needs more space: ${def.id}" }
+            if (!case.nativeOnly) check(def.effects.size == counts.getValue(def.id.substringAfter(':'))) {
+                "Expected every authored effect for ${def.id}"
+            }
             def.effects.forEach { effect ->
                 val key = "effect.better_rpg_progression.${effect.attributeId.replace(':', '.')}"
-                check(I18n.exists(key)) { "Missing concise effect label: $key" }
-                // Overview labels truncate by design; complete labels have the full detail sheet width.
-                check(mc.font.width(Component.translatable(key)) <= canvasWidth - 260) {
-                    "Effect label exceeds detail sheet width: $key"
+                check(I18n.exists(key)) { "Missing effect label: $key" }
+                if (narration != null) check(Component.translatable(key).string in narration) {
+                    "Missing from first-screen narration without points: $key"
                 }
             }
         }

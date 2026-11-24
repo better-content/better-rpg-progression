@@ -87,6 +87,8 @@ class StatsEffectPresentationTest {
     fun `paired optional integrations have stable presentation groups`() {
         assertEquals("goety", StatsEffectPresentation.group("goety:spell_range"))
         assertEquals("goety", StatsEffectPresentation.group("goety:casting_speed"))
+        assertEquals("tacz", StatsEffectPresentation.group("better_rpg_progression:recoil_reduction"))
+        assertEquals("tacz", StatsEffectPresentation.group("better_rpg_progression:dispersion_reduction"))
         assertEquals("parcool", StatsEffectPresentation.group("parcool:stamina_recovery"))
         assertEquals("cold_sweat", StatsEffectPresentation.group("better_rpg_progression:heat_drift_reduction"))
         assertEquals("epicfight", StatsEffectPresentation.group("better_rpg_progression:air_slash_damage_bonus"))
